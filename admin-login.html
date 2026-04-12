@@ -1,0 +1,168 @@
+// =====================================================
+// XZAI Admin - Secure Authentication System
+// =====================================================
+
+class SecureAdminAuth {
+  constructor() {
+    // SHA-256 hashes of allowed passwords
+    // يمكن إضافة أكثر من كلمة سر (للمدراء المختلفين)
+    this.allowedHashes = [
+      
+      'ce96d7a8fdaf50e8551e44cc3f43bc498f19050edffec77f3eb25d4a46602a2f',
+      
+    ];
+    
+    this.sessionKey = 'xzai_admin_auth_v3';
+    this.maxAttempts = 3;
+    this.lockoutTime = 15 * 60 * 1000; // 15 minutes
+  }
+
+  // تحويل كلمة السر إلى SHA-256 hash
+  async hashPassword(password) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  // فحص إذا كان المستخدم محظور
+  isLockedOut() {
+    const lockout = localStorage.getItem('admin_lockout');
+    if (!lockout) return false;
+    
+    const lockoutTime = parseInt(lockout);
+    const now = Date.now();
+    
+    if (now < lockoutTime) {
+      const remainingMinutes = Math.ceil((lockoutTime - now) / 60000);
+      return remainingMinutes;
+    }
+    
+    // انتهت فترة الحظر
+    localStorage.removeItem('admin_lockout');
+    localStorage.removeItem('admin_attempts');
+    return false;
+  }
+
+  // زيادة عدد المحاولات الفاشلة
+  recordFailedAttempt() {
+    let attempts = parseInt(localStorage.getItem('admin_attempts') || '0');
+    attempts++;
+    localStorage.setItem('admin_attempts', attempts.toString());
+    
+    if (attempts >= this.maxAttempts) {
+      const lockoutUntil = Date.now() + this.lockoutTime;
+      localStorage.setItem('admin_lockout', lockoutUntil.toString());
+      
+      // إرسال تنبيه (اختياري)
+      this.sendSecurityAlert('Multiple failed login attempts');
+      
+      return true; // locked out
+    }
+    
+    return false; // not locked yet
+  }
+
+  // التحقق من كلمة السر
+  async verifyPassword(password) {
+    const hash = await this.hashPassword(password);
+    return this.allowedHashes.includes(hash);
+  }
+
+  // تسجيل الدخول
+  async login(password) {
+    // فحص الحظر
+    const lockedMinutes = this.isLockedOut();
+    if (lockedMinutes) {
+      throw new Error(`تم حظرك لمدة ${lockedMinutes} دقيقة بسبب المحاولات الفاشلة`);
+    }
+
+    // التحقق من كلمة السر
+    const isValid = await this.verifyPassword(password);
+    
+    if (!isValid) {
+      const isLocked = this.recordFailedAttempt();
+      if (isLocked) {
+        throw new Error('تم حظرك لمدة 15 دقيقة بسبب 3 محاولات فاشلة');
+      }
+      throw new Error('كلمة السر غير صحيحة');
+    }
+
+    // تسجيل دخول ناجح
+    localStorage.removeItem('admin_attempts');
+    
+    // حفظ session token مشفر
+    const sessionToken = await this.generateSessionToken(password);
+    sessionStorage.setItem(this.sessionKey, sessionToken);
+    
+    // Log successful login
+    this.logAccess('login_success');
+    
+    return true;
+  }
+
+  // توليد session token آمن
+  async generateSessionToken(password) {
+    const timestamp = Date.now();
+    const randomStr = Math.random().toString(36).substring(2);
+    const combined = `${password}:${timestamp}:${randomStr}`;
+    return await this.hashPassword(combined);
+  }
+
+  // فحص إذا كان المستخدم مسجل دخول
+  async isAuthenticated() {
+    const token = sessionStorage.getItem(this.sessionKey);
+    if (!token) return false;
+    
+    // يمكن إضافة فحص إضافي هنا (مثل انتهاء الصلاحية)
+    return true;
+  }
+
+  // تسجيل الخروج
+  logout() {
+    sessionStorage.removeItem(this.sessionKey);
+    this.logAccess('logout');
+    window.location.reload();
+  }
+
+  // تسجيل الوصول (للمراقبة)
+  logAccess(action) {
+    const logs = JSON.parse(localStorage.getItem('admin_access_logs') || '[]');
+    logs.push({
+      action,
+      timestamp: new Date().toISOString(),
+      userAgent: navigator.userAgent,
+      ip: 'client-side' // في الـ backend يمكن الحصول على IP الحقيقي
+    });
+    
+    // احفظ آخر 50 log فقط
+    if (logs.length > 50) logs.shift();
+    localStorage.setItem('admin_access_logs', JSON.stringify(logs));
+  }
+
+  // إرسال تنبيه أمني (يتطلب backend)
+  async sendSecurityAlert(message) {
+    try {
+      // يمكن إرسال إلى backend أو email
+      console.warn('[SECURITY ALERT]', message, {
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent
+      });
+      
+      // في الـ production، أرسل إلى backend:
+      // await fetch('/api/security/alert', {
+      //   method: 'POST',
+      //   body: JSON.stringify({ message, timestamp: Date.now() })
+      // });
+    } catch (error) {
+      console.error('Failed to send security alert:', error);
+    }
+  }
+}
+
+// Initialize
+const adminAuth = new SecureAdminAuth();
+
+// Export globally
+window.adminAuth = adminAuth;

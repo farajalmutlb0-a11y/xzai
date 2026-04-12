@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>XZAI – AI News &amp; Insights</title>
+    <link>https://xzai.ai</link>
+    <description>Your #1 source for AI news, tool reviews, and breakthroughs. Updated daily.</description>
+    <language>en-us</language>
+    <atom:link href="https://xzai.ai/rss.xml" rel="self" type="application/rss+xml"/>
+    <image>
+      <url>https://xzai.ai/images/logo-xzai.webp</url>
+      <title>XZAI</title>
+      <link>https://xzai.ai</link>
+    </image>
+    <item>
+      <title>Welcome to XZAI – Your Daily AI Intelligence Hub</title>
+      <link>https://xzai.ai/news.html</link>
+      <description>Stay ahead of AI developments with daily news, in-depth tool reviews, and expert analysis on ChatGPT, Gemini, Claude, Grok and every major AI breakthrough.</description>
+      <pubDate>Thu, 10 Apr 2026 00:00:00 GMT</pubDate>
+      <guid>https://xzai.ai/news.html#welcome</guid>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,24 @@
+User-agent: *
+Allow: /
+
+# Block sensitive files
+Disallow: /admin.html
+Disallow: /admin-login.html
+Disallow: /test-supabase.html
+Disallow: /xai-style.html
+Disallow: /js/
+Disallow: /backend/
+Disallow: /*.sql
+Disallow: /*.env
+Disallow: /*.md
+Disallow: /DEPLOY*
+Disallow: /INSTALL*
+Disallow: /API-KEYS*
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+Sitemap: https://xzai.ai/sitemap.xml

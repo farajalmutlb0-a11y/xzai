@@ -1,0 +1,858 @@
+/**
+ * XZAI.ai — AI Engine v7.0
+ * 100% AI-Driven Content System — Professional Edition
+ * Handles: Dynamic content loading, auto-refresh, smart caching, analytics, Load More
+ */
+
+const XZAI_ENGINE = {
+  version: '6.1',
+  cacheTime: 5 * 60 * 1000, // 5 minutes cache
+  cache: {},
+
+  // ─── HTML ESCAPE (XSS Protection) ────────────────────────────
+  esc(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#x27;');
+  },
+
+  // Safe URL — يمنع javascript: protocol
+  safeUrl(url) {
+    if (!url) return '';
+    const trimmed = String(url).trim().toLowerCase();
+    if (trimmed.startsWith('javascript:') || trimmed.startsWith('data:text/html')) return '#';
+    return url;
+  },
+
+  // ─── API URL RESOLVER ────────────────────────────────────────
+  // يكتشف تلقائياً: هل نحن على المنصة الأصلية أم على استضافة خارجية
+  apiUrl(table, id = '') {
+    const isLocalPlatform = window.location.hostname.includes('genspark') ||
+                            window.location.hostname === 'localhost' ||
+                            window.location.hostname === '127.0.0.1' ||
+                            window.location.protocol === 'blob:';
+    
+    // استخدام Supabase للمواقع المنشورة (Vercel, Netlify, etc.)
+    const hasSupabaseConfig = window.XZAI_CONFIG && window.XZAI_CONFIG.supabase;
+    
+    if (isLocalPlatform && !hasSupabaseConfig) {
+      // المنصة الأصلية — يستخدم API المدمجة
+      return id ? `tables/${table}/${id}` : `tables/${table}`;
+    } else if (hasSupabaseConfig) {
+      // استخدام Supabase مباشرة
+      return 'supabase'; // علامة خاصة
+    } else {
+      // Fallback لـ Backend API
+      const backendUrl = window.XZAI_CONFIG?.backend?.url || '';
+      return backendUrl ? `${backendUrl}/api/${table}${id ? '/' + id : ''}` : null;
+    }
+  },
+
+  // ─── CORE API ────────────────────────────────────────────────
+  async fetchTable(table, params = {}) {
+    const qs = new URLSearchParams({ limit: 100, ...params }).toString();
+    const key = `${table}?${qs}`;
+    const now = Date.now();
+
+    if (this.cache[key] && now - this.cache[key].ts < this.cacheTime) {
+      return this.cache[key].data;
+    }
+
+    try {
+      const baseUrl = this.apiUrl(table);
+      
+      // Supabase Direct
+      if (baseUrl === 'supabase' && window.XZAI_CONFIG?.supabase) {
+        if (!window.supabaseClient) {
+          const { createClient } = supabase;
+          window.supabaseClient = createClient(
+            window.XZAI_CONFIG.supabase.url,
+            window.XZAI_CONFIG.supabase.anonKey
+          );
+        }
+        
+        let query = window.supabaseClient.from(table).select('*');
+        
+        // Apply filters from params
+        if (params.search) {
+          query = query.or(`title.ilike.%${params.search}%,content.ilike.%${params.search}%`);
+        }
+        if (params.category) {
+          query = query.eq('category', params.category);
+        }
+        if (params.limit) {
+          query = query.limit(parseInt(params.limit));
+        }
+        if (params.sort) {
+          query = query.order(params.sort, { ascending: params.order === 'asc' });
+        } else {
+          query = query.order('created_at', { ascending: false });
+        }
+        
+        const { data, error } = await query;
+        if (error) throw error;
+        
+        const json = { data: data || [], total: data?.length || 0 };
+        this.cache[key] = { data: json, ts: now };
+        return json;
+      }
+      
+      // Traditional API
+      if (!baseUrl) throw new Error('No API URL configured');
+      const separator = baseUrl.includes('?') ? '&' : '?';
+      const res = await fetch(`${baseUrl}${separator}${qs}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      this.cache[key] = { data: json, ts: now };
+      return json;
+    } catch (e) {
+      console.warn(`[XZAI Engine] Failed to fetch ${table}:`, e.message);
+      return { data: [] };
+    }
+  },
+
+  async fetchOne(table, id) {
+    try {
+      const baseUrl = this.apiUrl(table, id);
+      
+      // Supabase Direct
+      if (baseUrl === 'supabase' && window.XZAI_CONFIG?.supabase) {
+        if (!window.supabaseClient) {
+          const { createClient } = supabase;
+          window.supabaseClient = createClient(
+            window.XZAI_CONFIG.supabase.url,
+            window.XZAI_CONFIG.supabase.anonKey
+          );
+        }
+        
+        const { data, error } = await window.supabaseClient
+          .from(table)
+          .select('*')
+          .eq('id', id)
+          .single();
+          
+        if (error) throw error;
+        return data;
+      }
+      
+      // Traditional API
+      if (!baseUrl) throw new Error('No API URL configured');
+      const res = await fetch(baseUrl);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (e) {
+      console.warn(`[XZAI Engine] Failed to fetch ${table}/${id}:`, e.message);
+      return null;
+    }
+  },
+
+  async createRecord(table, data) {
+    try {
+      const baseUrl = this.apiUrl(table);
+      
+      // Supabase Direct
+      if (baseUrl === 'supabase' && window.XZAI_CONFIG?.supabase) {
+        if (!window.supabaseClient) {
+          const { createClient } = supabase;
+          window.supabaseClient = createClient(
+            window.XZAI_CONFIG.supabase.url,
+            window.XZAI_CONFIG.supabase.anonKey
+          );
+        }
+        
+        const { data: result, error } = await window.supabaseClient
+          .from(table)
+          .insert(data)
+          .select()
+          .single();
+          
+        if (error) throw error;
+        return result;
+      }
+      
+      // Traditional API
+      if (!baseUrl) throw new Error('No API URL configured');
+      const res = await fetch(baseUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      return await res.json();
+    } catch (e) {
+      console.error('[XZAI Engine] Create failed:', e);
+      return null;
+    }
+  },
+
+  async updateRecord(table, id, data) {
+    try {
+      const res = await fetch(this.apiUrl(table, id), {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      return await res.json();
+    } catch (e) {
+      console.error('[XZAI Engine] Update failed:', e);
+      return null;
+    }
+  },
+
+  async deleteRecord(table, id) {
+    try {
+      await fetch(this.apiUrl(table, id), { method: 'DELETE' });
+      return true;
+    } catch (e) {
+      console.error('[XZAI Engine] Delete failed:', e);
+      return false;
+    }
+  },
+
+  // ─── UTILITIES ───────────────────────────────────────────────
+  timeAgo(dateStr) {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    const hrs = Math.floor(mins / 60);
+    const days = Math.floor(hrs / 24);
+    if (mins < 60) return `${mins} min ago`;
+    if (hrs < 24) return `${hrs} h ago`;
+    if (days < 7) return `${days}d ago`;
+    return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  },
+
+  formatNum(n) {
+    if (!n) return '0';
+    if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+    if (n >= 1000) return Math.round(n / 1000) + 'K';
+    return n.toString();
+  },
+
+  slugify(str) {
+    return str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  },
+
+  categoryLabel(cat) {
+    const labels = {
+      openai: 'OpenAI', google: 'Google AI', anthropic: 'Anthropic',
+      xai: 'xAI / Grok', meta: 'Meta AI', research: 'Research',
+      policy: 'Policy & Law', creative: 'Creative AI'
+    };
+    return labels[cat] || cat;
+  },
+
+  categoryIcon(cat) {
+    const icons = {
+      openai:    `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="display:inline;vertical-align:middle;margin-right:3px"><circle cx="6" cy="6" r="5" fill="none" stroke="#a78bfa" stroke-width="1.5"/><path d="M4 6h4M6 4v4" stroke="#a78bfa" stroke-width="1.2" stroke-linecap="round"/></svg>`,
+      google:    `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="display:inline;vertical-align:middle;margin-right:3px"><circle cx="6" cy="6" r="5" fill="none" stroke="#60a5fa" stroke-width="1.5"/><circle cx="6" cy="6" r="2" fill="#60a5fa"/></svg>`,
+      anthropic: `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="display:inline;vertical-align:middle;margin-right:3px"><path d="M6 1l4 8H2z" fill="none" stroke="#f59e0b" stroke-width="1.4" stroke-linejoin="round"/></svg>`,
+      xai:       `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="display:inline;vertical-align:middle;margin-right:3px"><path d="M7 1L3 7h4l-2 4 6-7H7z" fill="#fb7185" stroke="#fb7185" stroke-width="0.3" stroke-linejoin="round"/></svg>`,
+      meta:      `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="display:inline;vertical-align:middle;margin-right:3px"><rect x="1" y="3" width="4" height="6" rx="1.5" fill="none" stroke="#818cf8" stroke-width="1.4"/><rect x="7" y="3" width="4" height="6" rx="1.5" fill="none" stroke="#818cf8" stroke-width="1.4"/></svg>`,
+      research:  `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="display:inline;vertical-align:middle;margin-right:3px"><circle cx="5" cy="5" r="3.5" fill="none" stroke="#2dd4bf" stroke-width="1.4"/><path d="M8 8l2.5 2.5" stroke="#2dd4bf" stroke-width="1.5" stroke-linecap="round"/></svg>`,
+      policy:    `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="display:inline;vertical-align:middle;margin-right:3px"><rect x="2" y="1" width="8" height="10" rx="1.5" fill="none" stroke="#fb923c" stroke-width="1.4"/><path d="M4 4h4M4 6.5h3" stroke="#fb923c" stroke-width="1.2" stroke-linecap="round"/></svg>`,
+      creative:  `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="display:inline;vertical-align:middle;margin-right:3px"><circle cx="6" cy="6" r="4" fill="none" stroke="#f472b6" stroke-width="1.4"/><circle cx="6" cy="6" r="1.5" fill="#f472b6"/></svg>`,
+      industry:  `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="display:inline;vertical-align:middle;margin-right:3px"><path d="M1 9V5l3-2v2l3-2v2l3-2v6H1z" fill="none" stroke="#c084fc" stroke-width="1.3" stroke-linejoin="round"/></svg>`,
+    };
+    return icons[cat] || icons.industry;
+  },
+
+  // ─── ARTICLE CARD BUILDER ────────────────────────────────────
+  buildArticleCard(article, size = 'normal') {
+    const badges = [];
+    if (article.trending) badges.push('<span class="badge badge-trending">🔥 Trending</span>');
+    if (article.featured) badges.push('<span class="badge badge-featured">⭐ Featured</span>');
+
+    const tags = Array.isArray(article.tags) ? article.tags : [];
+    const firstTag = tags[0] || article.category;
+
+    // Smart fallback image based on category
+    const FALLBACK = {
+      openai:    '1677442135703-1787eea5ce01',
+      google:    '1573804633927-bfcbcd909acd',
+      anthropic: '1620712943543-bcc4688e7485',
+      meta:      '1611532736597-de2d4265fba3',
+      xai:       '1676573394373-b0c5d7a5d52e',
+      research:  '1507413473-4f50b0fc22de',
+      industry:  '1486312338219-ce68d2c6f44d',
+      policy:    '1589578527966-fdac0f44566c',
+      creative:  '1547826039-a1e770b75bc9',
+    };
+    const photoId = FALLBACK[article.category] || FALLBACK.industry;
+    const imgSrc = article.image_url && article.image_url.startsWith('http')
+      ? article.image_url
+      : `https://images.unsplash.com/photo-${photoId}?w=800&h=450&fit=crop&q=80`;
+
+    if (size === 'featured') {
+      return `
+        <article class="featured-card reveal" data-category="${article.category}">
+          <a href="article.html?id=${article.id}" class="featured-img-link">
+            <img src="${imgSrc}" alt="${this.esc(article.title)}" loading="lazy" class="featured-img">
+            <div class="featured-overlay">
+              ${badges.join('')}
+            </div>
+          </a>
+          <div class="featured-body">
+            <div class="article-cat">${this.categoryIcon(article.category)} ${this.categoryLabel(article.category)}</div>
+            <h2 class="featured-title">
+              <a href="article.html?id=${article.id}">${this.esc(article.title)}</a>
+            </h2>
+            <p class="featured-excerpt">${this.esc(article.excerpt)}</p>
+            <div class="article-meta">
+              <span><i class="fas fa-user"></i> ${this.esc(article.author)}</span>
+              <span><i class="fas fa-clock"></i> ${this.timeAgo(article.published_at)}</span>
+              <span><i class="fas fa-eye"></i> ${this.formatNum(article.views)}</span>
+              <span><i class="fas fa-book-open"></i> ${article.read_time || 5} min read</span>
+            </div>
+            <a href="article.html?id=${article.id}" class="read-more-btn">Read Full Story <i class="fas fa-arrow-right"></i></a>
+          </div>
+        </article>`;
+    }
+
+    return `
+      <article class="news-card reveal" data-category="${article.category}">
+        <a href="article.html?id=${article.id}" class="news-img-link">
+          <img src="${imgSrc}" alt="${this.esc(article.title)}" loading="lazy" class="news-img"
+               onerror="this.src='https://images.unsplash.com/photo-${photoId}?w=800&h=450&fit=crop&q=80'">
+          ${article.trending ? '<span class="card-badge">🔥 Trending</span>' : ''}
+          ${article.featured && !article.trending ? '<span class="card-badge" style="background:var(--accent)">⭐ Featured</span>' : ''}
+        </a>
+        <div class="news-body">
+          <div class="news-cat">${this.categoryIcon(article.category)} ${this.categoryLabel(article.category)}</div>
+          <h3 class="news-title">
+            <a href="article.html?id=${article.id}">${this.esc(article.title)}</a>
+          </h3>
+          <p class="news-excerpt">${this.esc(article.excerpt)}</p>
+          <div class="news-meta">
+            <span><i class="fas fa-clock"></i> ${this.timeAgo(article.published_at)}</span>
+            <span><i class="fas fa-eye"></i> ${this.formatNum(article.views)}</span>
+            <span><i class="fas fa-book-open"></i> ${article.read_time || 5} min</span>
+          </div>
+        </div>
+      </article>`;
+  },
+
+  // ─── TOOL CARD BUILDER ───────────────────────────────────────
+  buildToolCard(tool) {
+    const stars = this.buildStars(tool.rating);
+    const features = Array.isArray(tool.features) ? tool.features.slice(0, 4) : [];
+    return `
+      <div class="tool-card reveal" data-category="${tool.category}">
+        <div class="tool-header">
+          <img src="${this.safeUrl(tool.image_url)}" alt="${this.esc(tool.name)}" class="tool-img" loading="lazy">
+          <div class="tool-info">
+            <h3 class="tool-name">${this.esc(tool.name)}</h3>
+            ${tool.badge ? `<span class="tool-badge">${tool.badge}</span>` : ''}
+            <div class="tool-rating">${stars} <span>${tool.rating}/5</span></div>
+          </div>
+        </div>
+        <p class="tool-desc">${tool.description}</p>
+        <ul class="tool-features">
+          ${features.map(f => `<li><i class="fas fa-check"></i> ${f}</li>`).join('')}
+        </ul>
+        <div class="tool-footer">
+          <span class="tool-price">${tool.price}</span>
+          <div class="tool-actions">
+            <a href="${tool.review_url}" class="btn-review">Review</a>
+            <a href="${tool.affiliate_url}" target="_blank" rel="noopener" class="btn-try ${tool.is_free ? 'free' : ''}">
+              ${tool.is_free ? 'Try Free' : 'Try Now'} <i class="fas fa-external-link-alt"></i>
+            </a>
+          </div>
+        </div>
+      </div>`;
+  },
+
+  buildStars(rating) {
+    const full = Math.floor(rating);
+    const half = rating % 1 >= 0.5;
+    let s = '';
+    for (let i = 0; i < full; i++) s += '<i class="fas fa-star"></i>';
+    if (half) s += '<i class="fas fa-star-half-alt"></i>';
+    return `<span class="stars">${s}</span>`;
+  },
+
+  // ─── REVIEW CARD BUILDER ────────────────────────────────────
+  buildReviewCard(review) {
+    const stars = this.buildStars(review.overall_score);
+    const pros = Array.isArray(review.pros) ? review.pros : [];
+    const cons = Array.isArray(review.cons) ? review.cons : [];
+    return `
+      <div class="review-card reveal" data-category="${review.category}">
+        <div class="review-header">
+          <img src="${this.safeUrl(review.image_url)}" alt="${this.esc(review.tool_name)}" class="review-img" loading="lazy">
+          <div>
+            <h3 class="review-title">${this.esc(review.tool_name)}</h3>
+            <div class="review-score">${stars} <span>${review.overall_score}/5</span></div>
+            <span class="review-verdict">${review.verdict}</span>
+          </div>
+        </div>
+        <p class="review-summary">${review.summary}</p>
+        <div class="review-scores">
+          ${this.buildScoreBar('Ease of Use', review.ease_score)}
+          ${this.buildScoreBar('Features', review.features_score)}
+          ${this.buildScoreBar('Value', review.value_score)}
+          ${this.buildScoreBar('Support', review.support_score)}
+        </div>
+        <div class="pros-cons">
+          <div class="pros">
+            <h4>✅ Pros</h4>
+            <ul>${pros.map(p => `<li>${p}</li>`).join('')}</ul>
+          </div>
+          <div class="cons">
+            <h4>❌ Cons</h4>
+            <ul>${cons.map(c => `<li>${c}</li>`).join('')}</ul>
+          </div>
+        </div>
+        <div class="review-footer">
+          <span class="review-price">💰 ${review.price}</span>
+          <a href="${review.affiliate_url}" target="_blank" rel="noopener" class="btn-try">
+            Try ${this.esc(review.tool_name)} <i class="fas fa-external-link-alt"></i>
+          </a>
+        </div>
+        <p class="review-updated">Updated: ${review.updated_at_label}</p>
+      </div>`;
+  },
+
+  buildScoreBar(label, score) {
+    const pct = (score / 5) * 100;
+    return `
+      <div class="score-bar-wrap">
+        <span class="score-label">${label}</span>
+        <div class="score-bar"><div class="score-fill" style="width:${pct}%"></div></div>
+        <span class="score-val">${score}</span>
+      </div>`;
+  },
+
+  // ─── VIEW COUNTER ────────────────────────────────────────────
+  async incrementViews(articleId, currentViews) {
+    if (!articleId) return;
+    const key = `viewed_${articleId}`;
+    if (sessionStorage.getItem(key)) return;
+    sessionStorage.setItem(key, '1');
+    const newViews = (currentViews || 0) + 1;
+    await this.updateRecord('ai_articles', articleId, { views: newViews });
+  },
+
+  // ─── AUTO REFRESH ────────────────────────────────────────────
+  startAutoRefresh(callback, intervalMs = 5 * 60 * 1000) {
+    setInterval(() => {
+      this.cache = {}; // clear cache
+      callback();
+    }, intervalMs);
+  },
+
+  // ─── PAGE: HOME ──────────────────────────────────────────────
+  async renderHome() {
+    const data = await this.fetchTable('ai_articles', { sort: 'published_at', limit: 100 });
+    let articles = (data.data || []).filter(a => a.status === 'published')
+      .sort((a, b) => new Date(b.published_at) - new Date(a.published_at));
+
+    if (!articles.length) {
+      articles = [
+        { id:'s1', title:'GPT-4o Gets Major Update: Faster Responses and Better Reasoning', summary:'OpenAI rolls out significant improvements to its flagship model, including faster inference and enhanced reasoning.', category:'openai', published_at: new Date().toISOString(), featured: true, trending: true, status:'published', image_url:'' },
+        { id:'s2', title:'Google Gemini 2.0 Flash Now Available to All Developers', summary:'Google expands access to its latest model with multimodal capabilities including vision and audio.', category:'google', published_at: new Date(Date.now()-86400000).toISOString(), featured: true, trending: false, status:'published', image_url:'' },
+        { id:'s3', title:'Anthropic Releases Claude 4 with 1 Million Token Context', summary:'The latest Claude model supports massive context windows for entire codebase analysis.', category:'anthropic', published_at: new Date(Date.now()-172800000).toISOString(), featured: true, trending: true, status:'published', image_url:'' },
+        { id:'s4', title:'Meta LLaMA 4 Open-Source Model Beats GPT-4 on Benchmarks', summary:'Meta releases its most powerful open-source model, outperforming many proprietary models.', category:'meta', published_at: new Date(Date.now()-259200000).toISOString(), featured: false, trending: true, status:'published', image_url:'' },
+        { id:'s5', title:'xAI Grok 3 Launches with Real-Time Web Search', summary:"xAI upgrades Grok with live internet access for up-to-the-minute answers.", category:'xai', published_at: new Date(Date.now()-345600000).toISOString(), featured: false, trending: false, status:'published', image_url:'' },
+        { id:'s6', title:'AI Tools Now Write 40% of All Code at Major Tech Firms', summary:'Industry survey shows AI-assisted development has crossed a major productivity threshold.', category:'research', published_at: new Date(Date.now()-432000000).toISOString(), featured: false, trending: false, status:'published', image_url:'' },
+      ];
+    }
+
+    if (!articles.length) return;
+
+    const featured = articles.filter(a => a.featured);
+    const trending = articles.filter(a => a.trending);
+
+    // Featured / Products Grid (3 top articles)
+    const productsEl = document.getElementById('productsGrid');
+    if (productsEl && articles.length) {
+      const top3 = featured.length >= 3 ? featured.slice(0, 3) : articles.slice(0, 3);
+      productsEl.innerHTML = top3.map(a => `
+        <div class="product-col reveal">
+          <a href="article.html?id=${a.id}" class="product-img-link">
+            <img src="${this.safeUrl(a.image_url)}" alt="${this.esc(a.title)}" class="product-img" loading="lazy">
+          </a>
+          <div class="product-cat">${this.categoryIcon(a.category)} ${this.categoryLabel(a.category)}</div>
+          <h3 class="product-title"><a href="article.html?id=${a.id}">${this.esc(a.title)}</a></h3>
+          <p class="product-excerpt">${a.excerpt ? a.excerpt.substring(0, 100) + '…' : ''}</p>
+          <div class="product-meta">
+            <span>${this.timeAgo(a.published_at)}</span>
+            <span>${this.formatNum(a.views)} views</span>
+          </div>
+        </div>`).join('');
+    }
+
+    // Trending ticker
+    const tickerEl = document.getElementById('ticker-content');
+    if (tickerEl && trending.length) {
+      const items = trending.map(a =>
+        `<a href="article.html?id=${a.id}" class="ticker-item">🔥 ${this.esc(a.title)}</a>`
+      ).join(' &nbsp;·&nbsp; ');
+      tickerEl.innerHTML = items + ' &nbsp;·&nbsp; ' + items;
+    }
+
+    // Latest news grid with Load More
+    const gridEl = document.getElementById('news-grid');
+    if (gridEl) {
+      const latest = articles.filter(a => !featured.some(f => f.id === a.id));
+      this._homeArticles = latest;
+      this._homeOffset = 0;
+      const BATCH = 9;
+      const loadMore = () => {
+        const batch = this._homeArticles.slice(this._homeOffset, this._homeOffset + BATCH);
+        if (!batch.length) return;
+        gridEl.insertAdjacentHTML('beforeend', batch.map(a => this.buildArticleCard(a)).join(''));
+        this._homeOffset += BATCH;
+        this.initReveal();
+        const btn = document.getElementById('load-more-btn');
+        if (btn) btn.style.display = this._homeOffset >= this._homeArticles.length ? 'none' : '';
+      };
+      gridEl.innerHTML = '';
+      loadMore();
+      const loadMoreBtn = document.getElementById('load-more-btn');
+      if (loadMoreBtn) {
+        loadMoreBtn.addEventListener('click', loadMore);
+        loadMoreBtn.style.display = articles.length <= BATCH ? 'none' : '';
+      }
+    }
+
+    // Sidebar trending
+    const sideEl = document.getElementById('sidebar-trending');
+    if (sideEl) {
+      const top5 = [...articles].sort((a, b) => (b.views || 0) - (a.views || 0)).slice(0, 5);
+      sideEl.innerHTML = top5.map((a, i) => `
+        <a href="article.html?id=${a.id}" class="trending-item">
+          <span class="trending-num">${i + 1}</span>
+          <div>
+            <span class="trending-title">${this.esc(a.title)}</span>
+            <span class="trending-views">${this.formatNum(a.views)} views</span>
+          </div>
+        </a>`).join('');
+    }
+
+    // Update stats counters
+    const totalViews = articles.reduce((s, a) => s + (a.views || 0), 0);
+    const statsMap = { 'stat-articles': articles.length, 'stat-views': Math.round(totalViews / 1000) };
+    Object.entries(statsMap).forEach(([id, val]) => {
+      const el = document.getElementById(id);
+      if (el) el.setAttribute('data-target', val);
+    });
+
+    this.initReveal();
+  },
+
+  // ─── PAGE: NEWS ──────────────────────────────────────────────
+  async renderNews() {
+    const data = await this.fetchTable('ai_articles', { sort: 'published_at', limit: 50 });
+    let articles = (data.data || []).filter(a => a.status === 'published');
+
+    // Fallback static articles when DB is empty
+    if (!articles.length) {
+      articles = [
+        { id:'s1', title:'GPT-4o Gets Major Update: Faster Responses and Better Reasoning', summary:'OpenAI rolls out significant improvements to its flagship model, including faster inference speeds and enhanced logical reasoning capabilities across all plan tiers.', category:'openai', published_at: new Date().toISOString(), source:'OpenAI Blog' },
+        { id:'s2', title:'Google Gemini 2.0 Flash Now Available to All Developers', summary:'Google expands access to its latest Gemini model, offering developers a powerful and cost-efficient API with multimodal capabilities including vision and audio.', category:'google', published_at: new Date(Date.now()-86400000).toISOString(), source:'Google DeepMind' },
+        { id:'s3', title:'Anthropic Releases Claude 4 with Extended Context Window', summary:'The latest Claude model supports up to 1 million tokens of context, enabling analysis of entire codebases and lengthy documents in a single conversation.', category:'anthropic', published_at: new Date(Date.now()-172800000).toISOString(), source:'Anthropic' },
+        { id:'s4', title:'Meta LLaMA 4 Open-Source Model Beats GPT-4 on Key Benchmarks', summary:'Meta releases its most powerful open-source model yet, outperforming many proprietary models on coding, reasoning, and multilingual tasks.', category:'meta', published_at: new Date(Date.now()-259200000).toISOString(), source:'Meta AI' },
+        { id:'s5', title:'xAI Grok 3 Launches with Real-Time Web Search Integration', summary:"Elon Musk's AI company upgrades Grok with live internet access, allowing the model to answer questions with up-to-the-minute information from across the web.", category:'xai', published_at: new Date(Date.now()-345600000).toISOString(), source:'xAI' },
+        { id:'s6', title:'AI Coding Tools Now Write 40% of All New Code at Major Tech Firms', summary:'A new industry survey reveals that AI-assisted development has crossed a significant threshold, with tools like GitHub Copilot and Cursor driving unprecedented productivity gains.', category:'research', published_at: new Date(Date.now()-432000000).toISOString(), source:'XZAI Research' },
+      ].map(a => ({ ...a, status: 'published' }));
+    }
+
+    const container = document.getElementById('news-list');
+    const countEl = document.getElementById('article-count');
+
+    if (!container) return;
+
+    const renderList = (list) => {
+      if (!list.length) {
+        container.innerHTML = '<p class="no-results">No articles found in this category.</p>';
+        if (countEl) countEl.textContent = '0';
+        return;
+      }
+      container.innerHTML = list.map(a => this.buildNewsListItem(a)).join('');
+      if (countEl) countEl.textContent = list.length;
+      this.initReveal();
+    };
+
+    // Check URL param for category filter
+    const urlCat = new URLSearchParams(window.location.search).get('cat');
+    const filtered = urlCat ? articles.filter(a => a.category === urlCat) : articles;
+    renderList(filtered);
+
+    // Activate the right filter button
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      const cat = btn.dataset.cat || '';
+      btn.classList.toggle('active', (urlCat || '') === cat || (!urlCat && cat === ''));
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const f = btn.dataset.cat;
+        const res = f ? articles.filter(a => a.category === f) : articles;
+        renderList(res);
+      });
+    });
+
+    // Sort buttons
+    document.querySelectorAll('.sort-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const sort = btn.dataset.sort;
+        let sorted = [...articles];
+        if (sort === 'popular') sorted.sort((a, b) => (b.views || 0) - (a.views || 0));
+        else if (sort === 'trending') sorted = sorted.filter(a => a.trending).concat(sorted.filter(a => !a.trending));
+        renderList(sorted);
+      });
+    });
+  },
+
+  buildNewsListItem(article) {
+    return `
+      <article class="news-list-item reveal" data-category="${article.category}">
+        <a href="article.html?id=${article.id}" class="nl-img-wrap">
+          <img src="${this.safeUrl(article.image_url)}" alt="${this.esc(article.title)}" loading="lazy" class="nl-img">
+          ${article.trending ? '<span class="nl-badge">🔥 Trending</span>' : ''}
+        </a>
+        <div class="nl-body">
+          <div class="nl-cat">${this.categoryIcon(article.category)} ${this.categoryLabel(article.category)}</div>
+          <h3 class="nl-title"><a href="article.html?id=${article.id}">${this.esc(article.title)}</a></h3>
+          <p class="nl-excerpt">${this.esc(article.excerpt)}</p>
+          <div class="nl-meta">
+            <span><i class="fas fa-user"></i> ${this.esc(article.author)}</span>
+            <span><i class="fas fa-clock"></i> ${this.timeAgo(article.published_at)}</span>
+            <span><i class="fas fa-eye"></i> ${this.formatNum(article.views)}</span>
+            <span><i class="fas fa-book-open"></i> ${article.read_time || 5} min read</span>
+          </div>
+          <a href="article.html?id=${article.id}" class="nl-read-btn">Read Full Story <i class="fas fa-arrow-right"></i></a>
+        </div>
+      </article>`;
+  },
+
+  // ─── PAGE: ARTICLE ───────────────────────────────────────────
+  async renderArticle() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const articleId = urlParams.get('id');
+
+    if (!articleId) {
+      window.location.href = 'news.html';
+      return;
+    }
+
+    const article = await this.fetchOne('ai_articles', articleId);
+    if (!article || article.status === 'archived') {
+      document.getElementById('article-body').innerHTML = '<p class="error">Article not found.</p>';
+      return;
+    }
+
+    // Update page meta
+    document.title = `${this.esc(article.title)} | XZAI`;
+    document.querySelector('meta[name="description"]')?.setAttribute('content', article.excerpt);
+    document.querySelector('meta[property="og:title"]')?.setAttribute('content', article.title);
+    document.querySelector('meta[property="og:image"]')?.setAttribute('content', article.image_url);
+
+    // Hero image
+    const heroImg = document.getElementById('article-hero-img');
+    if (heroImg) heroImg.src = article.image_url;
+
+    // Title & meta
+    const titleEl = document.getElementById('article-title');
+    if (titleEl) titleEl.textContent = article.title;
+
+    const authorEl = document.getElementById('article-author');
+    if (authorEl) authorEl.textContent = article.author;
+
+    const dateEl = document.getElementById('article-date');
+    if (dateEl) dateEl.textContent = new Date(article.published_at)
+      .toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+    const viewsEl = document.getElementById('article-views');
+    if (viewsEl) viewsEl.textContent = this.formatNum(article.views);
+
+    const readEl = document.getElementById('article-read-time');
+    if (readEl) readEl.textContent = `${article.read_time || 5} min read`;
+
+    const catEl = document.getElementById('article-category');
+    if (catEl) catEl.textContent = `${this.categoryIcon(article.category)} ${this.categoryLabel(article.category)}`;
+
+    // Article body
+    const bodyEl = document.getElementById('article-body');
+    if (bodyEl) bodyEl.innerHTML = article.content;
+
+    // Tags
+    const tagsEl = document.getElementById('article-tags');
+    if (tagsEl && Array.isArray(article.tags)) {
+      tagsEl.innerHTML = article.tags.map(t => `<a href="news.html?q=${encodeURIComponent(t)}" class="tag">${t}</a>`).join('');
+    }
+
+    // Breadcrumb
+    const bcCatEl = document.getElementById('bc-category');
+    if (bcCatEl) {
+      bcCatEl.textContent = this.categoryLabel(article.category);
+      bcCatEl.href = `news.html?cat=${article.category}`;
+    }
+
+    // Increment views
+    await this.incrementViews(articleId, article.views);
+
+    // Related articles
+    await this.renderRelated(article);
+  },
+
+  async renderRelated(currentArticle) {
+    const data = await this.fetchTable('ai_articles', { limit: 20 });
+    const all = (data.data || []).filter(a => a.status === 'published' && a.id !== currentArticle.id);
+    const sameCat = all.filter(a => a.category === currentArticle.category);
+    const related = sameCat.length >= 3 ? sameCat.slice(0, 3) : [...sameCat, ...all.filter(a => a.category !== currentArticle.category)].slice(0, 3);
+
+    const relEl = document.getElementById('related-articles');
+    if (relEl && related.length) {
+      relEl.innerHTML = related.map(a => this.buildArticleCard(a)).join('');
+      this.initReveal();
+    }
+  },
+
+  // ─── PAGE: TOOLS ────────────────────────────────────────────
+  async renderTools() {
+    const data = await this.fetchTable('ai_tools_db', { limit: 50 });
+    const tools = data.data || [];
+
+    const container = document.getElementById('tools-grid');
+    if (!container) return;
+
+    const renderTools = (list) => {
+      container.innerHTML = list.length
+        ? list.map(t => this.buildToolCard(t)).join('')
+        : '<p class="no-results">No tools found.</p>';
+      this.initReveal();
+    };
+
+    renderTools(tools);
+
+    // Category filter
+    document.querySelectorAll('.cat-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.cat-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const cat = btn.dataset.cat;
+        renderTools(cat ? tools.filter(t => t.category === cat) : tools);
+      });
+    });
+
+    // Search
+    const searchInput = document.getElementById('tools-search');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        const q = e.target.value.toLowerCase().trim();
+        if (!q) { renderTools(tools); return; }
+        renderTools(tools.filter(t =>
+          t.name.toLowerCase().includes(q) || t.description.toLowerCase().includes(q)
+        ));
+      });
+    }
+  },
+
+  // ─── PAGE: REVIEWS ──────────────────────────────────────────
+  async renderReviews() {
+    const data = await this.fetchTable('ai_reviews', { limit: 50 });
+    const reviews = data.data || [];
+
+    const container = document.getElementById('reviews-grid');
+    if (!container) return;
+
+    const renderReviews = (list) => {
+      container.innerHTML = list.length
+        ? list.map(r => this.buildReviewCard(r)).join('')
+        : '<p class="no-results">No reviews found.</p>';
+      this.initReveal();
+    };
+
+    renderReviews(reviews);
+
+    document.querySelectorAll('.review-filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.review-filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const cat = btn.dataset.cat;
+        renderReviews(cat ? reviews.filter(r => r.category === cat) : reviews);
+      });
+    });
+  },
+
+  // ─── REVEAL ANIMATION ───────────────────────────────────────
+  initReveal() {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => entry.target.classList.add('visible'), i * 80);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal:not(.visible)').forEach(el => observer.observe(el));
+  },
+
+  // ─── NEWSLETTER ─────────────────────────────────────────────
+  async subscribe(email, source = 'homepage') {
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return { success: false, message: 'Please enter a valid email address.' };
+    }
+    await this.createRecord('subscribers', {
+      email, source, status: 'active',
+      subscribed_at: new Date().toISOString()
+    });
+    return { success: true, message: 'Welcome! You\'re now subscribed to XZAI Daily.' };
+  },
+
+  // ─── TOAST ───────────────────────────────────────────────────
+  toast(message, type = 'success') {
+    const t = document.createElement('div');
+    t.className = `toast toast-${type}`;
+    t.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}`;
+    document.body.appendChild(t);
+    requestAnimationFrame(() => t.classList.add('show'));
+    setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, 4000);
+  },
+
+  // ─── SCHEDULER (Auto-Refresh Content) ───────────────────────
+  startScheduler() {
+    const page = window.location.pathname.split('/').pop() || 'index.html';
+    const refreshMap = {
+      'index.html': () => this.renderHome(),
+      'news.html': () => this.renderNews(),
+      'tools.html': () => this.renderTools(),
+      'reviews.html': () => this.renderReviews(),
+      '': () => this.renderHome()
+    };
+    if (refreshMap[page]) {
+      this.startAutoRefresh(refreshMap[page], 5 * 60 * 1000);
+    }
+  },
+
+  // ─── INIT ────────────────────────────────────────────────────
+  async init() {
+
+    const page = window.location.pathname.split('/').pop() || 'index.html';
+
+    const runners = {
+      'index.html': () => this.renderHome(),
+      'news.html':  () => this.renderNews(),
+      // article.html has its own inline loader — engine skips it
+      'tools.html':   () => this.renderTools(),
+      'reviews.html': () => this.renderReviews(),
+      '': () => this.renderHome()
+    };
+
+    if (runners[page]) {
+      await runners[page]();
+      this.startScheduler();
+    }
+  }
+};
+
+// Auto-initialize when DOM is ready (guard against double-load)
+if (!window.__xzEngineLoaded) {
+  window.__xzEngineLoaded = true;
+  document.addEventListener('DOMContentLoaded', () => XZAI_ENGINE.init());
+}

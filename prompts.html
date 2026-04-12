@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Best AI Prompts Library 2026 | XZAI</title>
+  <meta name="description" content="500+ best AI prompts for ChatGPT, Claude, and Gemini. Prompts for writing, coding, marketing, business, SEO, and more. Copy and use instantly.">
+  <link rel="canonical" href="https://xzai.ai/prompts.html">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/grok-theme.css">
+  <style>
+    .prompt-filters { display:flex; flex-wrap:wrap; gap:8px; margin:24px 0; }
+    .pf-btn { padding:8px 18px; border-radius:100px; border:1px solid var(--border); background:var(--card); color:var(--text2); font-size:13px; font-weight:600; cursor:pointer; transition:.2s; }
+    .pf-btn:hover, .pf-btn.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+    .prompts-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:16px; }
+    .prompt-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px; transition:.2s; position:relative; }
+    .prompt-card:hover { border-color:rgba(167,139,250,.3); transform:translateY(-2px); }
+    .prompt-cat { font-size:11px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:.1em; margin-bottom:8px; }
+    .prompt-title { font-size:15px; font-weight:700; margin-bottom:10px; }
+    .prompt-text { font-size:13px; color:var(--text2); line-height:1.7; background:rgba(255,255,255,.02); border-radius:8px; padding:12px; border:1px solid rgba(255,255,255,.04); margin-bottom:12px; font-family:monospace; }
+    .prompt-footer { display:flex; justify-content:space-between; align-items:center; }
+    .prompt-models { display:flex; gap:6px; }
+    .model-tag { font-size:10px; font-weight:700; padding:2px 8px; border-radius:100px; }
+    .model-gpt { background:rgba(16,185,129,.1); color:#34d399; border:1px solid rgba(16,185,129,.2); }
+    .model-claude { background:rgba(245,158,11,.1); color:#fbbf24; border:1px solid rgba(245,158,11,.2); }
+    .model-gemini { background:rgba(59,130,246,.1); color:#60a5fa; border:1px solid rgba(59,130,246,.2); }
+    .copy-btn { padding:6px 16px; background:var(--accent); color:#fff; border-radius:100px; font-size:12px; font-weight:700; cursor:pointer; border:none; transition:.2s; }
+    .copy-btn:hover { background:#6d28d9; }
+    .copy-btn.copied { background:#10b981; }
+    .prompt-search { max-width:500px; position:relative; margin-bottom:24px; }
+    .prompt-search input { width:100%; padding:12px 20px 12px 44px; background:var(--card); border:1px solid var(--border); border-radius:100px; color:#fff; font-size:14px; outline:none; }
+    .prompt-search i { position:absolute; left:16px; top:50%; transform:translateY(-50%); color:var(--text2); }
+  </style>
+  <meta property="og:title" content="Best AI Prompts Library 2026 | XZAI">
+  <meta property="og:description" content="500+ best AI prompts for ChatGPT, Claude, and Gemini. Copy and use instantly.">
+  <meta property="og:url" content="https://xzai.ai/prompts.html">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=1200&h=630&fit=crop">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Best AI Prompts Library 2026 | XZAI">
+  <meta name="twitter:description" content="500+ best AI prompts for ChatGPT, Claude, and Gemini. Copy and use instantly.">
+</head>
+<body>
+<nav class="navbar"><div class="nav-container">
+  <a href="index.html" class="nav-logo"><span class="logo-x">X</span><span class="logo-z">Z</span><span class="logo-ai">AI</span></a>
+  <div class="nav-links"><a href="news.html">News</a><a href="tools.html">Tools</a><a href="prompts.html" class="active">Prompts</a><a href="glossary.html">Glossary</a></div>
+</div></nav>
+
+<main>
+<section class="page-hero"><div class="container">
+  <div class="section-label"><i class="fas fa-magic"></i> Prompt Library</div>
+  <h1 class="page-hero-title">Best AI Prompts 2026</h1>
+  <p class="page-hero-desc">Copy-ready prompts for ChatGPT, Claude & Gemini. Click to copy, paste to use.</p>
+</div></section>
+
+<section class="section"><div class="container">
+
+  <div class="prompt-search">
+    <i class="fas fa-search"></i>
+    <input type="text" id="promptSearch" placeholder="Search prompts... e.g. 'blog post', 'code review'" autocomplete="off">
+  </div>
+
+  <div class="prompt-filters" id="promptFilters">
+    <button class="pf-btn active" data-cat="all">All Prompts</button>
+    <button class="pf-btn" data-cat="writing">✍️ Writing</button>
+    <button class="pf-btn" data-cat="coding">💻 Coding</button>
+    <button class="pf-btn" data-cat="marketing">📣 Marketing</button>
+    <button class="pf-btn" data-cat="business">💼 Business</button>
+    <button class="pf-btn" data-cat="seo">🔍 SEO</button>
+    <button class="pf-btn" data-cat="productivity">⚡ Productivity</button>
+    <button class="pf-btn" data-cat="analysis">📊 Analysis</button>
+  </div>
+
+  <div class="prompts-grid" id="promptsGrid"></div>
+
+</div></section>
+</main>
+
+<footer class="footer"><div class="container"><div class="footer-bottom"><span>© 2026 XZAI.ai — AI Prompts Library</span></div></div></footer>
+
+<script src="js/main.js"></script>
+<script src="js/xzai-features.js"></script>
+<script src="js/analytics.js"></script>
+<script>
+const PROMPTS = [
+  // Writing
+  { cat:'writing', title:'Blog Post Generator', models:['gpt','claude','gemini'],
+    text:'Write a comprehensive 1500-word blog post about [TOPIC] for [TARGET AUDIENCE]. Include: a compelling headline, 5-7 subheadings, practical examples, a strong conclusion with CTA. SEO-optimize for the keyword "[KEYWORD]". Tone: [professional/conversational/authoritative].' },
+  { cat:'writing', title:'Email Newsletter Writer', models:['gpt','claude'],
+    text:'Write a weekly email newsletter for [BUSINESS TYPE] subscribers. Subject: [TOPIC]. Include: a hook opening, 3 key insights with examples, one actionable tip readers can use today, and a clear CTA. Keep it under 400 words. Tone: friendly and expert.' },
+  { cat:'writing', title:'Product Description', models:['gpt','claude','gemini'],
+    text:'Write a compelling product description for [PRODUCT NAME]. Features: [LIST FEATURES]. Target customer: [CUSTOMER PROFILE]. Highlight the top 3 benefits (not features), address the main pain point it solves, and include a urgency-driven CTA. Keep under 200 words.' },
+  { cat:'writing', title:'LinkedIn Post', models:['gpt','claude'],
+    text:'Write a viral LinkedIn post about [TOPIC/LESSON/STORY]. Start with a bold hook (no "I" as first word). Share a personal insight or counterintuitive take. Use short paragraphs (1-2 lines max). End with a thought-provoking question. Aim for 150-200 words.' },
+  { cat:'writing', title:'Cold Email That Gets Replies', models:['gpt','claude'],
+    text:'Write a cold email to [PROSPECT ROLE] at [COMPANY TYPE]. My offer: [YOUR SERVICE/PRODUCT]. Their pain point: [SPECIFIC PAIN]. Keep it under 100 words. No fluff, no "I hope this email finds you well." Lead with value, end with one simple question (not "Would you be interested?").' },
+
+  // Coding
+  { cat:'coding', title:'Code Review Assistant', models:['gpt','claude'],
+    text:'Review this code for: 1) Bugs and logic errors, 2) Security vulnerabilities, 3) Performance issues, 4) Code readability and maintainability, 5) Best practices violations. For each issue found, explain why it\'s a problem and provide the corrected code. Here\'s the code:\n\n[PASTE CODE HERE]' },
+  { cat:'coding', title:'Debug This Error', models:['gpt','claude','gemini'],
+    text:'I\'m getting this error: [ERROR MESSAGE]\n\nContext: I\'m building [WHAT YOU\'RE BUILDING] using [TECH STACK].\n\nHere\'s the relevant code: [CODE]\n\nPlease: 1) Explain what\'s causing this error in plain English, 2) Provide the exact fix, 3) Explain how to prevent this in the future.' },
+  { cat:'coding', title:'Convert Code Between Languages', models:['gpt','claude'],
+    text:'Convert this [SOURCE LANGUAGE] code to [TARGET LANGUAGE]. Maintain the same logic and functionality. Use [TARGET LANGUAGE] best practices and idioms — don\'t just translate line by line. Add comments explaining any significant changes. Here\'s the code:\n\n[PASTE CODE]' },
+  { cat:'coding', title:'Write Unit Tests', models:['gpt','claude'],
+    text:'Write comprehensive unit tests for this function using [TESTING FRAMEWORK]. Cover: happy path, edge cases, error cases, boundary conditions. Each test should have a clear name describing what it tests. Include setup/teardown if needed.\n\nFunction:\n[PASTE FUNCTION]' },
+  { cat:'coding', title:'Explain Complex Code', models:['gpt','claude','gemini'],
+    text:'Explain this code as if I\'m a [junior developer / complete beginner / senior dev unfamiliar with this codebase]. Break it down: 1) What does it do overall? 2) Walk through it line by line, 3) What are the key algorithms/patterns used? 4) Are there any gotchas or non-obvious parts?\n\n[PASTE CODE]' },
+
+  // Marketing
+  { cat:'marketing', title:'Ad Copy Generator', models:['gpt','claude'],
+    text:'Write 5 variations of Facebook/Instagram ad copy for [PRODUCT/SERVICE]. Target audience: [DEMOGRAPHICS + INTERESTS]. Goal: [CLICKS/CONVERSIONS/AWARENESS]. Each variation should use a different hook: 1) Pain-focused, 2) Benefit-focused, 3) Social proof, 4) Curiosity gap, 5) Urgency. Include headline + body + CTA for each.' },
+  { cat:'marketing', title:'Content Calendar Creator', models:['gpt','claude','gemini'],
+    text:'Create a 30-day content calendar for [BRAND/BUSINESS] on [PLATFORM(S)]. Niche: [YOUR NICHE]. Goals: [GOALS]. For each day include: post type (video/image/text), topic, hook, key message, and hashtags. Mix educational (40%), entertaining (30%), and promotional (30%) content.' },
+  { cat:'marketing', title:'Brand Voice Guide', models:['claude','gpt'],
+    text:'Create a brand voice and tone guide for [COMPANY NAME]. We are a [BUSINESS TYPE] serving [TARGET AUDIENCE]. Our values: [LIST VALUES]. Create: 1) Voice personality (3-5 adjectives), 2) Tone variations (formal vs casual situations), 3) Words we use / words we avoid, 4) Example sentences showing our voice, 5) Common mistakes to avoid.' },
+
+  // Business
+  { cat:'business', title:'Business Plan Section', models:['gpt','claude'],
+    text:'Write the [executive summary / market analysis / competitive analysis / financial projections] section for a business plan for [BUSINESS IDEA]. Target market: [MARKET]. Location: [GEOGRAPHY]. Stage: [IDEA/MVP/GROWTH]. Make it investor-ready with specific data points and realistic projections.' },
+  { cat:'business', title:'SWOT Analysis', models:['gpt','claude','gemini'],
+    text:'Conduct a detailed SWOT analysis for [COMPANY/PRODUCT/IDEA] in the [INDUSTRY] industry. For each quadrant, provide 5-7 specific, actionable points. Then identify the top 3 strategic priorities based on the analysis. Be honest — don\'t sugarcoat weaknesses or threats.' },
+  { cat:'business', title:'Meeting Agenda Creator', models:['gpt','claude','gemini'],
+    text:'Create a structured agenda for a [MEETING TYPE] meeting. Duration: [TIME]. Attendees: [ROLES]. Goals: [WHAT DECISIONS/OUTCOMES DO YOU NEED]. Format: time allocation per item, owner for each agenda item, pre-work required, expected outcome. Keep it tight and action-oriented.' },
+  { cat:'business', title:'Investor Pitch Script', models:['gpt','claude'],
+    text:'Write a 5-minute investor pitch script for [STARTUP]. Problem: [PROBLEM]. Solution: [YOUR SOLUTION]. Market size: [TAM/SAM/SOM]. Business model: [HOW YOU MAKE MONEY]. Traction: [KEY METRICS]. Ask: [FUNDING AMOUNT AND USE]. Make it compelling, data-driven, and memorable.' },
+
+  // SEO
+  { cat:'seo', title:'SEO Blog Post Outline', models:['gpt','claude','gemini'],
+    text:'Create an SEO-optimized blog post outline for the keyword "[TARGET KEYWORD]". Include: title tag (under 60 chars), meta description (under 155 chars), H1, 6-8 H2s with H3 sub-points, semantic keywords to include, internal linking opportunities, and a FAQ section. Target word count: [WORD COUNT].' },
+  { cat:'seo', title:'Meta Description Writer', models:['gpt','claude','gemini'],
+    text:'Write 5 meta description variations for a page about [PAGE TOPIC]. Primary keyword: [KEYWORD]. Each must be under 155 characters, include the keyword naturally, have a clear value proposition, and end with an implicit or explicit CTA. Vary the approach (question, benefit, urgency, curiosity).' },
+  { cat:'seo', title:'FAQ Schema Generator', models:['gpt','claude'],
+    text:'Generate 10 FAQ questions and detailed answers for the topic "[TOPIC]" optimized for featured snippets and People Also Ask. Format each answer to be 40-60 words — long enough to be helpful, short enough to appear in snippets. Include the primary keyword naturally in each answer.' },
+
+  // Productivity
+  { cat:'productivity', title:'Task Prioritization', models:['gpt','claude','gemini'],
+    text:'Here are my tasks for [today/this week]: [LIST TASKS]. Help me prioritize them using the Eisenhower Matrix (urgent/important). For each task, suggest: 1) Priority level, 2) Estimated time, 3) Whether to do it, delegate, schedule, or eliminate. Also identify any tasks I can batch together.' },
+  { cat:'productivity', title:'Learning Plan Creator', models:['gpt','claude'],
+    text:'Create a 30-day learning plan to master [SKILL/TOPIC]. My current level: [BEGINNER/INTERMEDIATE]. Time available: [HOURS PER DAY/WEEK]. Learning style: [READING/VIDEO/PROJECT-BASED]. Include: daily/weekly milestones, free and paid resources, projects to build, and how to measure progress.' },
+  { cat:'productivity', title:'Meeting Summarizer', models:['gpt','claude','gemini'],
+    text:'Summarize this meeting transcript into: 1) 3-5 sentence executive summary, 2) Key decisions made, 3) Action items with owners and deadlines, 4) Open questions that need follow-up, 5) Next meeting agenda suggestions.\n\nTranscript:\n[PASTE TRANSCRIPT]' },
+
+  // Analysis
+  { cat:'analysis', title:'Competitor Analysis', models:['gpt','claude'],
+    text:'Analyze [COMPETITOR NAME] as a competitor to [YOUR COMPANY]. Research their: pricing strategy, target customers, key features, marketing approach, customer reviews (pros/cons), and apparent weaknesses. Then identify: 3 opportunities for [YOUR COMPANY] to differentiate, and 2 threats to address.' },
+  { cat:'analysis', title:'Data Interpretation', models:['gpt','claude','gemini'],
+    text:'Analyze this data and provide insights: [PASTE DATA OR DESCRIBE IT]. Questions to answer: 1) What are the 3 most important trends? 2) What anomalies or outliers exist? 3) What does this tell us about [BUSINESS QUESTION]? 4) What actions should we take based on this data? Present findings clearly for a non-technical audience.' },
+  { cat:'analysis', title:'Survey Response Analyzer', models:['claude','gpt'],
+    text:'Analyze these survey responses and identify: 1) Top themes and patterns (with frequency), 2) Sentiment analysis (positive/neutral/negative with %), 3) Most common pain points, 4) Unexpected insights, 5) Recommended actions based on the data. Present as an executive report.\n\nSurvey question: [QUESTION]\nResponses:\n[PASTE RESPONSES]' },
+];
+
+let currentCat = 'all';
+let currentSearch = '';
+
+function renderPrompts() {
+  const grid = document.getElementById('promptsGrid');
+  let filtered = PROMPTS.filter(p => {
+    const matchCat = currentCat === 'all' || p.cat === currentCat;
+    const matchSearch = !currentSearch || 
+      p.title.toLowerCase().includes(currentSearch) || 
+      p.text.toLowerCase().includes(currentSearch) ||
+      p.cat.toLowerCase().includes(currentSearch);
+    return matchCat && matchSearch;
+  });
+
+  if (!filtered.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--text2)">No prompts found. Try a different search.</div>';
+    return;
+  }
+
+  grid.innerHTML = filtered.map((p, i) => `
+    <div class="prompt-card" data-index="${i}">
+      <div class="prompt-cat">${p.cat}</div>
+      <div class="prompt-title">${p.title}</div>
+      <div class="prompt-text">${p.text.substring(0, 200)}${p.text.length > 200 ? '...' : ''}</div>
+      <div class="prompt-footer">
+        <div class="prompt-models">
+          ${p.models.includes('gpt') ? '<span class="model-tag model-gpt">ChatGPT</span>' : ''}
+          ${p.models.includes('claude') ? '<span class="model-tag model-claude">Claude</span>' : ''}
+          ${p.models.includes('gemini') ? '<span class="model-tag model-gemini">Gemini</span>' : ''}
+        </div>
+        <button class="copy-btn" onclick="copyPrompt(this, ${JSON.stringify(p.text).replace(/'/g, "&#39;")})">
+          <i class="fas fa-copy"></i> Copy
+        </button>
+      </div>
+    </div>`).join('');
+}
+
+function copyPrompt(btn, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.innerHTML = '<i class="fas fa-copy"></i> Copy';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+
+// Filters
+document.getElementById('promptFilters').addEventListener('click', e => {
+  const btn = e.target.closest('.pf-btn');
+  if (!btn) return;
+  document.querySelectorAll('.pf-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentCat = btn.dataset.cat;
+  renderPrompts();
+});
+
+// Search
+document.getElementById('promptSearch').addEventListener('input', e => {
+  currentSearch = e.target.value.toLowerCase().trim();
+  renderPrompts();
+});
+
+renderPrompts();
+</script>
+</body>
+</html>

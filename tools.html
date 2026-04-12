@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Best AI Tools 2026 – Reviews, Ratings & Comparisons | XZAI</title>
+  <meta name="description" content="Discover the best AI tools of 2026. Expert reviews, honest ratings for writing, image, video, audio, SEO, and coding AI tools.">
+  <meta property="og:description" content="Discover the best AI tools of 2026. Expert reviews, honest ratings for writing, image, video, audio, SEO, and coding AI tools.">
+  <meta property="og:title" content="Best AI Tools 2026 | XZAI">
+  <meta property="og:image" content="https://xzai.ai/images/logo-xzai.webp">
+  <link rel="canonical" href="https://xzai.ai/tools.html">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#7c3aed">
+  <link rel="icon" href="images/logo-xzai.webp">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;0,9..40,900;1,9..40,400&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/xzai-features.css">
+  <link rel="stylesheet" href="css/grok-theme.css">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BMBBHWQBZ5"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-BMBBHWQBZ5');</script>
+  <style>html,body{background:#050505!important;color:#fff!important}</style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/supabase-helper.js"></script>
+  <script>(function(){localStorage.setItem('xz-theme','dark');document.documentElement.setAttribute('data-theme','dark');document.documentElement.style.background='#050505';})();</script>
+</head>
+<body>
+<div id="read-progress"></div>
+
+<!-- SEARCH OVERLAY -->
+<div class="search-overlay" id="searchOverlay">
+  <div class="search-box">
+    <i class="fas fa-search search-icon"></i>
+    <input type="text" id="searchInput" placeholder="Search AI tools, news, reviews…" autocomplete="off">
+    <button class="search-close" onclick="closeSearch()"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="search-results" id="searchResults"></div>
+</div>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo" aria-label="XZAI Home">
+      <div class="logo-x">X</div><div class="logo-z">Z</div><div class="logo-ai">AI</div>
+    </a>
+    <ul class="nav-menu" id="navMenu">
+      <li><a href="index.html" class="nav-link">Home</a></li>
+      <li class="nav-dropdown">
+        <a href="news.html" class="nav-link">AI News <i class="fas fa-chevron-down" style="font-size:0.6rem;margin-left:3px"></i></a>
+        <div class="dropdown-panel">
+          <a href="news.html?cat=openai"    class="dp-item"><i class="fas fa-robot"></i> OpenAI / ChatGPT</a>
+          <a href="news.html?cat=google"    class="dp-item"><i class="fab fa-google"></i> Google / Gemini</a>
+          <a href="news.html?cat=anthropic" class="dp-item"><i class="fas fa-brain"></i> Anthropic / Claude</a>
+          <a href="news.html?cat=xai"       class="dp-item"><i class="fas fa-bolt"></i> xAI / Grok</a>
+          <a href="news.html"               class="dp-item"><i class="fas fa-globe"></i> All News</a>
+        </div>
+      </li>
+      <li><a href="tools.html"      class="nav-link active">AI Tools</a></li>
+      <li><a href="reviews.html"    class="nav-link">Reviews</a></li>
+      <li><a href="free-tools.html" class="nav-link">Free Tools</a></li>
+      <li><a href="about.html"      class="nav-link">About</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="nav-search-btn" onclick="openSearch()"><i class="fas fa-search"></i></button>
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()"><i class="fas fa-moon"></i></button>
+      <a href="newsletter.html" class="btn-nav"><i class="fas fa-envelope"></i> Newsletter</a>
+      <button class="hamburger" id="hamburger" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</nav>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="page-hero-label"><i class="fas fa-tools"></i> AI Tools Directory</div>
+    <h1 class="page-hero-title">Best AI Tools 2026</h1>
+    <p class="page-hero-desc">Expert reviews of 500+ AI tools. Honest ratings, real pros & cons, and transparent pricing. No paid placements.</p>
+    <div class="search-bar" style="margin-top:24px;max-width:420px">
+      <i class="fas fa-search"></i>
+      <input type="text" id="tools-search" placeholder="Search AI tools…">
+    </div>
+  </div>
+</div>
+
+<!-- AFFILIATE NOTE -->
+<div class="container" style="padding-top:24px">
+  <div class="affiliate-note">
+    <i class="fas fa-info-circle"></i>
+    Some links on this page are affiliate links. We may earn a commission at no extra cost to you. Our ratings are always independent and honest.
+  </div>
+</div>
+
+<!-- TOOLS -->
+<section class="section" style="padding-top:16px">
+  <div class="container">
+    <div class="filter-bar" id="cat-tabs" style="margin-bottom:32px">
+      <button class="cat-tab active" data-cat="">All Tools</button>
+      <button class="cat-tab" data-cat="chatbot">💬 Chatbots</button>
+      <button class="cat-tab" data-cat="writing">✍️ Writing</button>
+      <button class="cat-tab" data-cat="image">🎨 Image</button>
+      <button class="cat-tab" data-cat="video">🎬 Video</button>
+      <button class="cat-tab" data-cat="audio">🎵 Audio</button>
+      <button class="cat-tab" data-cat="coding">💻 Coding</button>
+      <button class="cat-tab" data-cat="seo">📈 SEO</button>
+      <button class="cat-tab" data-cat="productivity">⚡ Productivity</button>
+      <button class="cat-tab" data-cat="free">🆓 Free</button>
+    </div>
+
+    <div class="tools-grid" id="tools-grid">
+      <!-- Skeleton -->
+      <div class="tool-card skeleton"><div class="sk-pulse sk-h1"></div><div class="sk-pulse sk-h2" style="margin-top:12px"></div></div>
+      <div class="tool-card skeleton"><div class="sk-pulse sk-h1"></div><div class="sk-pulse sk-h2" style="margin-top:12px"></div></div>
+      <div class="tool-card skeleton"><div class="sk-pulse sk-h1"></div><div class="sk-pulse sk-h2" style="margin-top:12px"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:1px">
+            <span class="footer-logo-x">X</span><span class="footer-logo-zai">Z</span><span class="footer-logo-ai">AI</span>
+          </div>
+        </div>
+        <p class="footer-desc">Your source for AI news, tool reviews, and expert analysis.</p>
+        <div class="footer-social">
+          <a href="https://x.com/xzaiai" class="social-btn" target="_blank" rel="noopener"><i class="fab fa-twitter"></i></a>
+          
+          
+        </div>
+      </div>
+      <div><div class="footer-col-title">Content</div><div class="footer-links"><a href="news.html">AI News</a><a href="tools.html">AI Tools</a><a href="reviews.html">Reviews</a><a href="free-tools.html">Free AI Tools</a></div></div>
+      <div><div class="footer-col-title">Company</div><div class="footer-links"><a href="about.html">About Us</a><a href="contact.html">Contact</a><a href="newsletter.html">Newsletter</a></div></div>
+      <div><div class="footer-col-title">Legal</div><div class="footer-links"><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Service</a><a href="affiliate.html">Affiliate Disclosure</a></div></div>
+    </div>
+    <div class="footer-bottom"><span>© 2026 XZAI.ai</span></div>
+  </div>
+</footer>
+
+<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})"><i class="fas fa-chevron-up"></i></button>
+<script src="js/main.js"></script>
+<script src="js/ai-engine.js"></script>
+<script src="js/xzai-features.js"></script>
+<script src="js/analytics.js"></script>
+
+<script>
+// ── جلب الأدوات من Supabase ──
+(async function loadTools() {
+  const grid = document.getElementById('tools-grid');
+  if (!grid) return;
+
+  try {
+    await new Promise(r => setTimeout(r, 300)); // انتظر تحميل config
+    if (!window.XZAI_ENGINE) { grid.innerHTML = '<p style="color:#888;padding:40px;text-align:center">No tools found yet.</p>'; return; }
+
+    let cat = new URLSearchParams(location.search).get('cat') || '';
+    const params = { limit: 100 };
+    if (cat) params.category = cat;
+
+    const res = await XZAI_ENGINE.fetchTable('ai_tools_db', params);
+    const tools = (res?.data || []).filter(t => t.status === 'published');
+
+    if (!tools.length) {
+      grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;padding:60px;color:#64748b">No tools found.</p>';
+      return;
+    }
+
+    grid.innerHTML = tools.map(t => {
+      const stars = '★'.repeat(Math.round(t.rating||0)) + '☆'.repeat(5-Math.round(t.rating||0));
+      const img = t.image_url || 'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=400&h=300&fit=crop';
+      const free = t.pricing === 'free' || t.is_free ? '<span style="background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:#34d399;padding:2px 8px;border-radius:100px;font-size:11px;font-weight:700">FREE</span>' : '';
+      return `<div class="tool-card" onclick="location.href='${t.affiliate_url||t.website_url||'#'}'">
+        <div class="tool-img-wrap"><img src="${img}" alt="${t.name}" class="tool-img" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=400&h=300&fit=crop'"></div>
+        <div class="tool-body">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+            <span class="tool-name">${t.name}</span>${free}
+          </div>
+          <p class="tool-desc">${(t.description||'').substring(0,100)}...</p>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">
+            <span style="color:#f59e0b;font-size:13px">${stars} <span style="color:#64748b;font-size:12px">${t.rating||0}/5</span></span>
+            <a href="${t.affiliate_url||t.website_url||'#'}" target="_blank" rel="noopener" class="btn-try" onclick="event.stopPropagation()">Try Free →</a>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+
+    // فلترة بالـ tabs
+    document.querySelectorAll('.cat-tab').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        document.querySelectorAll('.cat-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const c = btn.dataset.cat;
+        if (c === 'free') {
+          const all = tools.filter(t => t.is_free || t.pricing === 'free' || t.pricing === 'freemium');
+          renderTools(all);
+        } else if (c) {
+          renderTools(tools.filter(t => t.category === c));
+        } else {
+          renderTools(tools);
+        }
+      });
+    });
+
+    function renderTools(list) {
+      if (!list.length) { grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;padding:40px;color:#64748b">No tools found.</p>'; return; }
+      grid.innerHTML = list.map(t => {
+        const stars = '★'.repeat(Math.round(t.rating||0)) + '☆'.repeat(5-Math.round(t.rating||0));
+        const img = t.image_url || 'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=400&h=300&fit=crop';
+        const free = t.pricing === 'free' || t.is_free ? '<span style="background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:#34d399;padding:2px 8px;border-radius:100px;font-size:11px;font-weight:700">FREE</span>' : '';
+        return `<div class="tool-card" onclick="location.href='${t.affiliate_url||t.website_url||'#'}'">
+          <div class="tool-img-wrap"><img src="${img}" alt="${t.name}" class="tool-img" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=400&h=300&fit=crop'"></div>
+          <div class="tool-body">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+              <span class="tool-name">${t.name}</span>${free}
+            </div>
+            <p class="tool-desc">${(t.description||'').substring(0,100)}...</p>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">
+              <span style="color:#f59e0b;font-size:13px">${stars} <span style="color:#64748b;font-size:12px">${t.rating||0}/5</span></span>
+              <a href="${t.affiliate_url||t.website_url||'#'}" target="_blank" rel="noopener" class="btn-try" onclick="event.stopPropagation()">Try Free →</a>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    // Search
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+      searchInput.addEventListener('input', () => {
+        const q = searchInput.value.toLowerCase();
+        renderTools(q ? tools.filter(t => t.name?.toLowerCase().includes(q) || t.description?.toLowerCase().includes(q)) : tools);
+      });
+    }
+
+  } catch(e) {
+    console.error('Tools error:', e);
+    grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;padding:60px;color:#64748b">Error loading tools.</p>';
+  }
+})();
+</script>
+<script src="js/push-notifications.js"></script>
+</body>
+</html>

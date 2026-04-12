@@ -1,0 +1,236 @@
+/**
+ * XZAI.ai — Full Auto System v3.0
+ * Gemini 2.0 Flash + Pexels Images
+ */
+
+const SUPABASE_URL   = process.env.SUPABASE_URL;
+const SUPABASE_KEY   = process.env.SUPABASE_ANON_KEY;
+const GEMINI_KEY     = process.env.GEMINI_API_KEY;
+const PEXELS_KEY     = process.env.PEXELS_API_KEY;
+const SITE_URL       = process.env.SITE_URL || 'https://xzai.ai';
+const MAX_PER_SRC    = 6;
+const MAX_TOTAL      = 20;
+const MAX_AI_EXPAND  = 8;
+
+const RSS_SOURCES = [
+  { id:'techcrunch',  name:'TechCrunch AI',   cat:'industry',
+    url:'https://api.rss2json.com/v1/api.json?rss_url=https://techcrunch.com/feed/&api_key=free&count=10&q=AI' },
+  { id:'verge',       name:'The Verge AI',    cat:'industry',
+    url:'https://api.rss2json.com/v1/api.json?rss_url=https://www.theverge.com/rss/index.xml&api_key=free&count=10' },
+  { id:'mit',         name:'MIT Tech Review', cat:'research',
+    url:'https://api.rss2json.com/v1/api.json?rss_url=https://www.technologyreview.com/feed/&api_key=free&count=8' },
+  { id:'venturebeat', name:'VentureBeat AI',  cat:'industry',
+    url:'https://api.rss2json.com/v1/api.json?rss_url=https://venturebeat.com/category/ai/feed/&api_key=free&count=10' },
+  { id:'wired',       name:'Wired AI',        cat:'industry',
+    url:'https://api.rss2json.com/v1/api.json?rss_url=https://www.wired.com/feed/rss&api_key=free&count=8' },
+  { id:'google',      name:'Google AI Blog',  cat:'google',
+    url:'https://api.rss2json.com/v1/api.json?rss_url=https://blog.google/technology/ai/rss/&api_key=free&count=8' },
+  { id:'openai',      name:'OpenAI Blog',     cat:'openai',
+    url:'https://api.rss2json.com/v1/api.json?rss_url=https://openai.com/blog/rss/&api_key=free&count=8' },
+  { id:'hackernews',  name:'Hacker News AI',  cat:'research',
+    url:'https://api.rss2json.com/v1/api.json?rss_url=https://hnrss.org/newest?q=AI+artificial+intelligence&api_key=free&count=10' }
+];
+
+const AFFILIATE_MAP = {
+  'jasper':     { url:'https://jasper.ai?fpr=xzai',               label:'Try Jasper Free →' },
+  'writesonic': { url:'https://writesonic.com?via=xzai',           label:'Try Writesonic →' },
+  'notion':     { url:'https://notion.so?ref=xzai',                label:'Try Notion AI →'  },
+  'midjourney': { url:'https://midjourney.com',                    label:'Try Midjourney →' },
+  'cursor':     { url:'https://cursor.sh',                         label:'Try Cursor IDE →' },
+  'chatgpt':    { url:'https://chat.openai.com',                   label:'Try ChatGPT →'    },
+  'claude':     { url:'https://claude.ai',                         label:'Try Claude →'     },
+  'gemini':     { url:'https://gemini.google.com',                 label:'Try Gemini →'     },
+  'grammarly':  { url:'https://grammarly.com',                     label:'Try Grammarly →'  },
+  'canva':      { url:'https://canva.com',                         label:'Try Canva AI →'   },
+  'perplexity': { url:'https://perplexity.ai',                     label:'Try Perplexity →' },
+  'copilot':    { url:'https://github.com/features/copilot',       label:'Try Copilot →'    },
+};
+
+const strip   = h => (h||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
+const slugify = t => t.toLowerCase().replace(/[^a-z0-9\s-]/g,'').replace(/\s+/g,'-').substring(0,60);
+
+// جلب صورة من Pexels
+async function getPexelsImage(query) {
+  if (!PEXELS_KEY) return null;
+  try {
+    const searchQuery = encodeURIComponent(query + ' technology AI');
+    const res = await fetch(
+      `https://api.pexels.com/v1/search?query=${searchQuery}&per_page=5&orientation=landscape`,
+      { headers: { Authorization: PEXELS_KEY } }
+    );
+    const data = await res.json();
+    const photos = data?.photos;
+    if (photos && photos.length > 0) {
+      const photo = photos[Math.floor(Math.random() * photos.length)];
+      return photo.src?.large2x || photo.src?.large || photo.src?.original;
+    }
+  } catch(e) {}
+  return null;
+}
+
+// صورة احتياطية من Unsplash
+function fallbackImg(title, cat) {
+  const PHOTOS = {
+    openai:['1677442135703-1787eea5ce01','1620712943543-bcc4688e7485'],
+    google:['1573804633927-bfcbcd909acd','1611532736597-de2d4265fba3'],
+    research:['1507413473-4f50b0fc22de','1532094348902-22db9d28dcc7'],
+    industry:['1677442135703-1787eea5ce01','1486312338219-ce68d2c6f44d'],
+    default:['1677442135703-1787eea5ce01','1507413473-4f50b0fc22de']
+  };
+  const arr = PHOTOS[cat] || PHOTOS.default;
+  const idx = title.length % arr.length;
+  return `https://images.unsplash.com/photo-${arr[idx]}?w=1200&h=630&fit=crop&q=80`;
+}
+
+function extractImg(item) {
+  if(item.thumbnail?.startsWith?.('http')) return item.thumbnail;
+  if(item['media:content']?.url) return item['media:content'].url;
+  const m=(item.description||'').match(/<img[^>]+src=["']([^"']+)["']/i);
+  return m?.[1]?.startsWith('http')?m[1]:null;
+}
+
+function injectAffiliate(content, title) {
+  const text=(content+' '+title).toLowerCase();
+  const found=[];
+  for(const [kw,data] of Object.entries(AFFILIATE_MAP)) {
+    if(text.includes(kw)) { found.push(data); if(found.length>=2) break; }
+  }
+  if(!found.length) return content;
+  const box=`\n<div style="margin:28px 0;padding:20px 24px;background:rgba(124,58,237,0.07);border:1px solid rgba(124,58,237,0.18);border-radius:12px;"><p style="font-size:13px;font-weight:700;color:#a78bfa;margin:0 0 12px">🔗 Recommended Tools</p><div style="display:flex;gap:10px;flex-wrap:wrap">${found.map(f=>`<a href="${f.url}" target="_blank" rel="noopener sponsored" style="padding:8px 20px;background:#7c3aed;color:#fff;border-radius:100px;font-size:13px;font-weight:600;text-decoration:none;display:inline-block">${f.label}</a>`).join('')}</div></div>\n`;
+  const last=content.lastIndexOf('</p>');
+  return last>-1 ? content.substring(0,last+4)+box+content.substring(last+4) : content+box;
+}
+
+// كتابة المقال بـ Gemini
+async function expandWithGemini(title, excerpt, source, category) {
+  if(!GEMINI_KEY) return null;
+  try {
+    const prompt = `You are a professional AI journalist for XZAI.ai. Write a detailed article:
+
+Title: ${title}
+Summary: ${excerpt}
+Source: ${source}
+
+Write 700-900 words. Requirements:
+- Professional engaging tone
+- Strong opening paragraph
+- Section: "What This Means For You" (practical impact)
+- Section: "Key Takeaways" (3-4 bullet points)
+- HTML format: <h2>, <p>, <ul>, <li> only
+- No markdown, no title in content
+- Forward-looking conclusion
+
+Write now:`;
+
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { maxOutputTokens: 1500, temperature: 0.7 },
+        }),
+      }
+    );
+    const data = await res.json();
+    return data?.candidates?.[0]?.content?.parts?.[0]?.text || null;
+  } catch(e) { return null; }
+}
+
+async function getPublishedUrls() {
+  try {
+    const r=await fetch(`${SUPABASE_URL}/rest/v1/ai_articles?select=source_url&limit=500&order=created_at.desc`,
+      {headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${SUPABASE_KEY}`}});
+    const d=await r.json();
+    return new Set((d||[]).map(x=>x.source_url).filter(Boolean));
+  } catch{return new Set();}
+}
+
+async function saveArticle(article) {
+  const{_url,...payload}=article;
+  const r=await fetch(`${SUPABASE_URL}/rest/v1/ai_articles`,{
+    method:'POST',
+    headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${SUPABASE_KEY}`,'Content-Type':'application/json',Prefer:'return=representation'},
+    body:JSON.stringify(payload)
+  });
+  if(r.ok||r.status===201){const d=await r.json();return Array.isArray(d)?d[0]:d;}
+  return null;
+}
+
+export const config={schedule:'0 0,6,12,18 * * *'};
+
+export default async function handler(){
+  const log=[];let published=0,aiExpanded=0;const saved=[];
+
+  const publishedUrls=await getPublishedUrls();
+
+  let all=[];
+  for(const src of RSS_SOURCES){
+    try{
+      const ctrl=new AbortController();
+      const tid=setTimeout(()=>ctrl.abort(),8000);
+      const r=await fetch(src.url,{signal:ctrl.signal});
+      clearTimeout(tid);
+      const data=await r.json();
+      const items=(data.items||[]).slice(0,MAX_PER_SRC);
+      for(const item of items){
+        const title=strip(item.title||'Untitled');
+        const excerpt=strip(item.description||item.content||'').substring(0,500);
+        const link=item.link||item.url||'';
+        all.push({title,excerpt,link,category:src.cat,source:src.name,
+          slug:slugify(title)+'-'+Date.now().toString(36),
+          image_url:extractImg(item)||null,
+          published_at:item.pubDate?new Date(item.pubDate).toISOString():new Date().toISOString(),
+          _url:link,_src:src.name});
+      }
+      log.push(`${src.name}: ${items.length}`);
+    }catch(e){log.push(`${src.name} ERR: ${e.message}`);}
+  }
+
+  const newItems=all.filter(a=>a._url&&!publishedUrls.has(a._url)).slice(0,MAX_TOTAL);
+  log.push(`New: ${newItems.length}`);
+
+  let aiCount=0;
+  for(const item of newItems){
+    try{
+      // جلب صورة من Pexels
+      if(!item.image_url) {
+        const pexelsImg = await getPexelsImage(item.title);
+        item.image_url = pexelsImg || fallbackImg(item.title, item.category);
+      }
+
+      let content=`<p>${item.excerpt}</p>\n<p><strong>Source:</strong> <a href="${item.link}" target="_blank" rel="noopener">${item._src}</a></p>`;
+      let readTime=3;
+
+      if(GEMINI_KEY&&aiCount<MAX_AI_EXPAND){
+        const expanded=await expandWithGemini(item.title,item.excerpt,item._src,item.category);
+        if(expanded){
+          content=expanded+`\n<p style="margin-top:20px;font-size:12px;color:#888">Source: <a href="${item.link}" target="_blank" rel="noopener">${item._src}</a></p>`;
+          readTime=Math.ceil(expanded.replace(/<[^>]*>/g,'').split(' ').length/200);
+          aiCount++;aiExpanded++;
+        }
+      }
+
+      content=injectAffiliate(content,item.title);
+
+      const result=await saveArticle({
+        title:item.title,slug:item.slug,excerpt:item.excerpt,content,
+        category:item.category,tags:['AI',item._src],source:item._src,
+        source_url:item._url,image_url:item.image_url,
+        published_at:item.published_at,status:'published',
+        views:0,featured:false,read_time:readTime,_url:item._url
+      });
+
+      if(result){
+        published++;
+        saved.push({id:result.id,title:item.title,category:item.category,image_url:item.image_url});
+        log.push(`✅${aiCount>0?'[AI]':''} ${item.title.substring(0,50)}`);
+      }
+      await new Promise(r=>setTimeout(r,300));
+    }catch(e){log.push(`❌ ${e.message}`);}
+  }
+
+  log.forEach(l=>console.log('[XZAI Cron]',l));
+  return{statusCode:200,body:JSON.stringify({published,aiExpanded,total:newItems.length,log})};
+}

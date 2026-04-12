@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChatGPT vs Claude 2026: Full Comparison | XZAI</title>
+  <meta name="description" content="ChatGPT vs Claude — detailed comparison of features, pricing, performance, and use cases. Which AI is better for you in 2026?">
+  <link rel="canonical" href="https://xzai.ai/compare/chatgpt-vs-claude.html">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/supabase-helper.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .compare-hero { padding: 80px 0 40px; text-align:center; }
+    .compare-vs { display:flex; align-items:center; justify-content:center; gap:32px; margin:32px 0; flex-wrap:wrap; }
+    .compare-tool { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:28px 36px; text-align:center; min-width:160px; }
+    .compare-tool img { width:64px; height:64px; border-radius:16px; margin-bottom:12px; object-fit:cover; }
+    .compare-tool h2 { font-size:20px; font-weight:800; margin:0; }
+    .vs-badge { font-size:28px; font-weight:900; color:var(--accent); }
+    .score-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin:40px 0; }
+    .score-card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:24px; }
+    .score-card h3 { font-size:16px; font-weight:700; margin:0 0 16px; color:var(--text2); }
+    .score-row { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--border); }
+    .score-row:last-child { border:none; }
+    .score-label { font-size:14px; color:var(--text2); }
+    .score-val { font-weight:700; font-size:15px; }
+    .score-val.win { color:#10b981; }
+    .score-val.lose { color:#64748b; }
+    .score-val.tie { color:#f59e0b; }
+    .verdict { background:linear-gradient(135deg,rgba(124,58,237,.1),rgba(6,182,212,.05)); border:1px solid rgba(124,58,237,.2); border-radius:16px; padding:32px; margin:32px 0; text-align:center; }
+    .verdict h2 { font-size:22px; margin-bottom:12px; }
+    .verdict p { color:var(--text2); max-width:600px; margin:0 auto; }
+    .use-case-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:32px 0; }
+    .use-case { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:20px; }
+    .use-case h4 { font-size:14px; font-weight:700; margin:0 0 8px; }
+    .use-case p { font-size:13px; color:var(--text2); margin:0; line-height:1.6; }
+    .rating-circle { width:72px; height:72px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:900; margin:0 auto 8px; }
+    .rating-a { background:rgba(16,185,129,.15); color:#10b981; border:2px solid rgba(16,185,129,.3); }
+    .rating-b { background:rgba(124,58,237,.15); color:#a78bfa; border:2px solid rgba(124,58,237,.3); }
+    .compare-table { width:100%; border-collapse:collapse; margin:32px 0; }
+    .compare-table th { background:rgba(255,255,255,.04); padding:14px 20px; text-align:left; font-size:13px; color:var(--text2); font-weight:600; border-bottom:1px solid var(--border); }
+    .compare-table td { padding:14px 20px; font-size:14px; border-bottom:1px solid rgba(255,255,255,.04); }
+    .compare-table tr:hover td { background:rgba(255,255,255,.02); }
+    .tag-win { display:inline-block; background:rgba(16,185,129,.12); color:#34d399; border:1px solid rgba(16,185,129,.2); border-radius:100px; padding:3px 10px; font-size:11px; font-weight:700; }
+    .tag-good { display:inline-block; background:rgba(124,58,237,.12); color:#a78bfa; border:1px solid rgba(124,58,237,.2); border-radius:100px; padding:3px 10px; font-size:11px; font-weight:700; }
+    @media(max-width:640px){ .score-grid,.use-case-grid{ grid-template-columns:1fr; } .compare-table{ font-size:12px; } .compare-table td,.compare-table th{ padding:10px; } }
+  </style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-container">
+    <a href="../index.html" class="nav-logo"><span class="logo-x">X</span><span class="logo-z">Z</span><span class="logo-ai">AI</span></a>
+    <div class="nav-links">
+      <a href="../news.html">News</a>
+      <a href="../tools.html">Tools</a>
+      <a href="../reviews.html">Reviews</a>
+      <a href="index.html" class="active">Compare</a>
+    </div>
+  </div>
+</nav>
+
+<main>
+  <section class="compare-hero">
+    <div class="container">
+      <div class="section-label"><i class="fas fa-balance-scale"></i> AI Comparison 2026</div>
+      <h1 class="page-hero-title">ChatGPT vs Claude</h1>
+      <p class="page-hero-desc">We tested both extensively. Here's what we found.</p>
+
+      <div class="compare-vs">
+        <div class="compare-tool">
+          <img src="https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=128&h=128&fit=crop" alt="ChatGPT">
+          <h2>ChatGPT</h2>
+          <p style="color:var(--text2);font-size:13px;margin:4px 0 0">by OpenAI</p>
+          <div class="rating-circle rating-a" style="margin-top:12px">4.8</div>
+        </div>
+        <div class="vs-badge">VS</div>
+        <div class="compare-tool">
+          <img src="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=128&h=128&fit=crop" alt="Claude">
+          <h2>Claude</h2>
+          <p style="color:var(--text2);font-size:13px;margin:4px 0 0">by Anthropic</p>
+          <div class="rating-circle rating-b" style="margin-top:12px">4.7</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+
+      <!-- Score Grid -->
+      <div class="score-grid">
+        <div class="score-card">
+          <h3>⚡ ChatGPT Wins At</h3>
+          <div class="score-row"><span class="score-label">Image Generation (DALL·E)</span><span class="score-val win">✓ Winner</span></div>
+          <div class="score-row"><span class="score-label">Plugin Ecosystem</span><span class="score-val win">✓ Winner</span></div>
+          <div class="score-row"><span class="score-label">Voice Mode</span><span class="score-val win">✓ Winner</span></div>
+          <div class="score-row"><span class="score-label">Brand Recognition</span><span class="score-val win">✓ Winner</span></div>
+          <div class="score-row"><span class="score-label">Free Tier Features</span><span class="score-val win">✓ Winner</span></div>
+        </div>
+        <div class="score-card">
+          <h3>🧠 Claude Wins At</h3>
+          <div class="score-row"><span class="score-label">Long Documents (200K)</span><span class="score-val win">✓ Winner</span></div>
+          <div class="score-row"><span class="score-label">Writing Quality</span><span class="score-val win">✓ Winner</span></div>
+          <div class="score-row"><span class="score-label">Safety & Accuracy</span><span class="score-val win">✓ Winner</span></div>
+          <div class="score-row"><span class="score-label">Following Instructions</span><span class="score-val win">✓ Winner</span></div>
+          <div class="score-row"><span class="score-label">Code Review</span><span class="score-val win">✓ Winner</span></div>
+        </div>
+      </div>
+
+      <!-- Full Table -->
+      <h2 style="margin:0 0 20px">Full Feature Comparison</h2>
+      <div style="overflow-x:auto">
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>ChatGPT</th>
+              <th>Claude</th>
+              <th>Winner</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Context Window</td><td>128K tokens</td><td>200K tokens</td><td><span class="tag-good">Claude</span></td></tr>
+            <tr><td>Free Plan</td><td>GPT-4o mini</td><td>Claude 3.5 Haiku</td><td><span class="tag-win">Tie</span></td></tr>
+            <tr><td>Paid Plan</td><td>$20/mo</td><td>$20/mo</td><td><span class="tag-win">Tie</span></td></tr>
+            <tr><td>Image Generation</td><td>✅ DALL·E 3</td><td>❌ None</td><td><span class="tag-win">ChatGPT</span></td></tr>
+            <tr><td>Web Browsing</td><td>✅ Yes</td><td>✅ Yes</td><td><span class="tag-win">Tie</span></td></tr>
+            <tr><td>Code Execution</td><td>✅ Yes</td><td>✅ Yes</td><td><span class="tag-win">Tie</span></td></tr>
+            <tr><td>Voice Mode</td><td>✅ Advanced</td><td>❌ No</td><td><span class="tag-win">ChatGPT</span></td></tr>
+            <tr><td>Writing Quality</td><td>⭐⭐⭐⭐</td><td>⭐⭐⭐⭐⭐</td><td><span class="tag-good">Claude</span></td></tr>
+            <tr><td>Hallucinations</td><td>Moderate</td><td>Lower</td><td><span class="tag-good">Claude</span></td></tr>
+            <tr><td>API Access</td><td>✅ Yes</td><td>✅ Yes</td><td><span class="tag-win">Tie</span></td></tr>
+            <tr><td>Mobile App</td><td>✅ iOS + Android</td><td>✅ iOS + Android</td><td><span class="tag-win">Tie</span></td></tr>
+            <tr><td>Plugins/Tools</td><td>✅ 100+ plugins</td><td>Limited</td><td><span class="tag-win">ChatGPT</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Use Cases -->
+      <h2 style="margin:32px 0 20px">Which One Should You Use?</h2>
+      <div class="use-case-grid">
+        <div class="use-case">
+          <h4>🎯 Use ChatGPT if you...</h4>
+          <p>Need image generation, use voice mode, want access to plugins and GPTs, or need the most recognized AI brand for client work.</p>
+        </div>
+        <div class="use-case">
+          <h4>🎯 Use Claude if you...</h4>
+          <p>Work with long documents, prioritize writing quality, need precise instruction-following, or want fewer AI hallucinations in professional settings.</p>
+        </div>
+        <div class="use-case">
+          <h4>💼 For Business</h4>
+          <p>Claude wins for document analysis, legal review, and complex writing. ChatGPT wins for creative campaigns and customer-facing content.</p>
+        </div>
+        <div class="use-case">
+          <h4>👨‍💻 For Developers</h4>
+          <p>Both are excellent. ChatGPT has more integrations. Claude writes cleaner, more maintainable code and gives better code explanations.</p>
+        </div>
+      </div>
+
+      <!-- Verdict -->
+      <div class="verdict">
+        <h2>🏆 Our Verdict</h2>
+        <p>Both are world-class AI assistants. <strong>ChatGPT</strong> is the better all-rounder with more features. <strong>Claude</strong> is better for writing, analysis, and working with long documents. Many professionals use both depending on the task.</p>
+        <div style="display:flex;gap:16px;justify-content:center;margin-top:24px;flex-wrap:wrap">
+          <a href="https://chat.openai.com" target="_blank" rel="noopener" class="btn btn-primary">Try ChatGPT Free →</a>
+          <a href="https://claude.ai" target="_blank" rel="noopener" class="btn btn-secondary">Try Claude Free →</a>
+        </div>
+      </div>
+
+      <!-- More Comparisons -->
+      <h2 style="margin:40px 0 20px">More Comparisons</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px">
+        <a href="chatgpt-vs-gemini.html" class="tool-card" style="text-decoration:none;padding:16px">
+          <div style="font-weight:700;margin-bottom:4px">ChatGPT vs Gemini</div>
+          <div style="font-size:12px;color:var(--text2)">OpenAI vs Google</div>
+        </a>
+        <a href="claude-vs-gemini.html" class="tool-card" style="text-decoration:none;padding:16px">
+          <div style="font-weight:700;margin-bottom:4px">Claude vs Gemini</div>
+          <div style="font-size:12px;color:var(--text2)">Anthropic vs Google</div>
+        </a>
+        <a href="chatgpt-vs-grok.html" class="tool-card" style="text-decoration:none;padding:16px">
+          <div style="font-weight:700;margin-bottom:4px">ChatGPT vs Grok</div>
+          <div style="font-size:12px;color:var(--text2)">OpenAI vs xAI</div>
+        </a>
+        <a href="midjourney-vs-dalle.html" class="tool-card" style="text-decoration:none;padding:16px">
+          <div style="font-weight:700;margin-bottom:4px">Midjourney vs DALL·E</div>
+          <div style="font-size:12px;color:var(--text2)">Best Image AI</div>
+        </a>
+      </div>
+
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-bottom"><span>© 2026 XZAI.ai — AI Comparisons, News & Tools</span></div>
+  </div>
+</footer>
+
+<script src="../js/main.js"></script>
+<script src="../js/analytics.js"></script>
+</body>
+</html>

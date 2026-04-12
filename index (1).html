@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Article | XZAI</title>
+  <meta name="description" content="In-depth AI analysis and news from XZAI — the #1 AI intelligence platform.">
+  <meta property="og:description" content="In-depth AI analysis and news from XZAI — the #1 AI intelligence platform.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="https://xzai.ai/images/logo-xzai.webp">
+  <link rel="canonical" href="https://xzai.ai/article.html">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#7c3aed">
+  <link rel="icon" href="images/logo-xzai.webp">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;0,9..40,900;1,9..40,400&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/xzai-features.css">
+  <link rel="stylesheet" href="css/grok-theme.css">
+  <!-- Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/supabase-helper.js"></script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BMBBHWQBZ5"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-BMBBHWQBZ5');</script>
+  <style>html,body{background:#050505!important;color:#fff!important}</style>
+  <script>(function(){localStorage.setItem('xz-theme','dark');document.documentElement.setAttribute('data-theme','dark');document.documentElement.style.background='#050505';})();</script>
+</head>
+<body>
+<div id="read-progress"></div>
+
+<!-- SEARCH OVERLAY -->
+<div class="search-overlay" id="searchOverlay">
+  <div class="search-box">
+    <i class="fas fa-search search-icon"></i>
+    <input type="text" id="searchInput" placeholder="Search AI news, tools, reviews…" autocomplete="off">
+    <button class="search-close" onclick="closeSearch()"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="search-results" id="searchResults"></div>
+</div>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo" aria-label="XZAI Home">
+      <div class="logo-x">X</div><div class="logo-z">Z</div><div class="logo-ai">AI</div>
+    </a>
+    <ul class="nav-menu" id="navMenu">
+      <li><a href="index.html" class="nav-link">Home</a></li>
+      <li class="nav-dropdown">
+        <a href="news.html" class="nav-link active">AI News <i class="fas fa-chevron-down" style="font-size:0.6rem;margin-left:3px"></i></a>
+        <div class="dropdown-panel">
+          <a href="news.html?cat=openai"    class="dp-item"><i class="fas fa-robot"></i> OpenAI / ChatGPT</a>
+          <a href="news.html?cat=xai"       class="dp-item"><i class="fas fa-bolt"></i> xAI / Grok</a>
+          <a href="news.html?cat=google"    class="dp-item"><i class="fab fa-google"></i> Google / Gemini</a>
+          <a href="news.html?cat=anthropic" class="dp-item"><i class="fas fa-brain"></i> Anthropic / Claude</a>
+          <a href="news.html?cat=meta"      class="dp-item"><i class="fas fa-cubes"></i> Meta AI</a>
+          <a href="news.html?cat=research"  class="dp-item"><i class="fas fa-flask"></i> Research</a>
+          <a href="news.html?cat=policy"    class="dp-item"><i class="fas fa-gavel"></i> Policy &amp; Law</a>
+          <a href="news.html"               class="dp-item"><i class="fas fa-globe"></i> All News</a>
+        </div>
+      </li>
+      <li><a href="tools.html"      class="nav-link">AI Tools</a></li>
+      <li><a href="reviews.html"    class="nav-link">Reviews</a></li>
+      <li><a href="free-tools.html" class="nav-link">Free Tools</a></li>
+      <li><a href="about.html"      class="nav-link">About</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="nav-search-btn" onclick="openSearch()" aria-label="Search"><i class="fas fa-search"></i></button>
+      
+      <a href="newsletter.html" class="btn-nav"><i class="fas fa-envelope"></i> Newsletter</a>
+      <button class="hamburger" id="hamburger" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</nav>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb" id="breadcrumb">
+  <a href="index.html">Home</a>
+  <i class="fas fa-chevron-right"></i>
+  <a href="news.html">AI News</a>
+  <i class="fas fa-chevron-right"></i>
+  <a href="news.html" id="bcCategory">Category</a>
+  <i class="fas fa-chevron-right"></i>
+  <span id="bcTitle" style="color:var(--text2)">Article</span>
+</div>
+
+<!-- ARTICLE LAYOUT -->
+<div class="article-layout">
+
+  <!-- MAIN ARTICLE -->
+  <article class="article-main">
+
+    <!-- SKELETON -->
+    <div id="articleSkeleton">
+      <div class="skeleton" style="height:360px;border-radius:var(--radius-lg);margin-bottom:28px"></div>
+      <div class="sk-pulse sk-h2" style="width:60%;margin-bottom:16px"></div>
+      <div class="sk-pulse sk-h2" style="width:85%;margin-bottom:10px"></div>
+      <div class="sk-pulse sk-h3" style="width:40%;margin-bottom:32px"></div>
+      <div class="sk-pulse sk-h3" style="width:100%;margin-bottom:10px"></div>
+      <div class="sk-pulse sk-h3" style="width:90%;margin-bottom:10px"></div>
+      <div class="sk-pulse sk-h3" style="width:95%;margin-bottom:10px"></div>
+      <div class="sk-pulse sk-h3" style="width:70%"></div>
+    </div>
+
+    <!-- ARTICLE CONTENT (filled by JS) -->
+    <div id="articleContent" style="display:none">
+
+      <!-- Hero Image -->
+      <div id="articleHeroWrap" style="margin-bottom:28px">
+        <img id="articleHeroImg" src="" alt="" class="article-hero-img" loading="eager">
+      </div>
+
+      <!-- Category Badge -->
+      <div class="article-category" id="articleCatBadge"></div>
+
+      <!-- Title -->
+      <h1 class="article-title-main" id="articleTitle"></h1>
+
+      <!-- Meta -->
+      <div class="article-byline" id="articleMeta"></div>
+
+      <!-- Body -->
+      <div class="article-body" id="articleBody"></div>
+
+      <!-- Tags -->
+      <div id="articleTagsWrap" style="margin-top:32px">
+        <p style="font-size:0.78rem;color:var(--muted);margin-bottom:10px">Tags:</p>
+        <div class="article-tags" id="articleTags"></div>
+      </div>
+
+      <!-- Share Bar -->
+      <div class="share-bar" style="margin-top:32px">
+        <span>Share:</span>
+        <button class="share-btn" onclick="shareArticle('twitter')"><i class="fab fa-twitter"></i> X</button>
+        <button class="share-btn" onclick="shareArticle('linkedin')"><i class="fab fa-linkedin"></i> LinkedIn</button>
+        <button class="share-btn" onclick="shareArticle('whatsapp')"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+        <button class="share-btn" onclick="shareArticle('copy')"><i class="fas fa-link"></i> Copy Link</button>
+      </div>
+
+      <!-- Author Bio -->
+      <div class="author-bio" id="authorBio">
+        <div class="author-av" id="authorAv">AI</div>
+        <div class="author-info">
+          <strong id="authorName">XZAI Staff</strong>
+          <span id="authorTitle">AI Analyst &amp; Editor · XZAI</span>
+          <p id="authorBioText">Expert AI analyst with 10+ years covering artificial intelligence, machine learning, and emerging technology. Trusted by AI professionals worldwide.</p>
+        </div>
+      </div>
+
+      <!-- Related Articles -->
+      <div id="relatedWrap" style="margin-top:48px">
+        <div class="section-label" style="margin-bottom:20px">Related Articles</div>
+        <div class="news-grid" id="relatedGrid"></div>
+      </div>
+
+    </div>
+  </article>
+
+  <!-- SIDEBAR -->
+  <aside class="article-sidebar">
+
+    <!-- Newsletter -->
+    <div class="sidebar-widget reveal">
+      <div class="sidebar-widget-title"><i class="fas fa-envelope"></i> Daily AI Digest</div>
+      <p style="font-size:0.82rem;color:var(--muted);margin-bottom:14px;line-height:1.6">Get the top AI stories every morning. Free forever.</p>
+      <form onsubmit="subscribeNewsletter2(event)">
+        <input type="email" id="nlEmail2" placeholder="your@email.com" class="form-control" style="margin-bottom:10px" required>
+        <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center">Subscribe Free</button>
+      </form>
+      <div id="nlMsg2" style="display:none;margin-top:10px;color:#10b981;font-size:0.82rem;font-weight:600">
+        <i class="fas fa-check-circle"></i> Subscribed! Check your inbox.
+      </div>
+    </div>
+
+    <!-- Trending -->
+    <div class="sidebar-widget reveal">
+      <div class="sidebar-widget-title"><i class="fas fa-fire"></i> Trending Now</div>
+      <div id="articleTrending">
+        <div class="sk-pulse sk-h3" style="margin-bottom:10px"></div>
+        <div class="sk-pulse sk-h3" style="margin-bottom:10px"></div>
+        <div class="sk-pulse sk-h3"></div>
+      </div>
+    </div>
+
+    <!-- Explore -->
+    <div class="sidebar-widget reveal">
+      <div class="sidebar-widget-title"><i class="fas fa-compass"></i> Explore</div>
+      <div class="article-tags">
+        <a href="news.html" class="tag">All AI News</a>
+        <a href="tools.html" class="tag">AI Tools</a>
+        <a href="reviews.html" class="tag">Reviews</a>
+        <a href="free-tools.html" class="tag">Free Tools</a>
+        <a href="newsletter.html" class="tag">Newsletter</a>
+      </div>
+    </div>
+
+  </aside>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:1px">
+            <span class="footer-logo-x">X</span>
+            <span class="footer-logo-zai">Z</span><span class="footer-logo-ai">AI</span>
+          </div>
+        </div>
+        <p class="footer-desc">Your source for AI news, tool reviews, and expert analysis.</p>
+        <div class="footer-social">
+          <a href="https://x.com/xzaiai" class="social-btn" target="_blank" rel="noopener"><i class="fab fa-twitter"></i></a>
+          
+          
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Content</div>
+        <div class="footer-links">
+          <a href="news.html">AI News</a>
+          <a href="tools.html">AI Tools</a>
+          <a href="reviews.html">Reviews</a>
+          <a href="free-tools.html">Free AI Tools</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Company</div>
+        <div class="footer-links">
+          <a href="about.html">About Us</a>
+          <a href="contact.html">Contact</a>
+          <a href="newsletter.html">Newsletter</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Legal</div>
+        <div class="footer-links">
+          <a href="privacy.html">Privacy Policy</a>
+          <a href="terms.html">Terms of Service</a>
+          <a href="affiliate.html">Affiliate Disclosure</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 XZAI.ai</span>
+      <a href="sitemap.xml">Sitemap</a>
+    </div>
+  </div>
+</footer>
+
+<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})"><i class="fas fa-chevron-up"></i></button>
+
+<script src="js/main.js"></script>
+<script src="js/security.js"></script>
+<script src="js/ai-engine.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  // Wait for Supabase
+  await initSupabase();
+  
+  const urlParams = new URLSearchParams(window.location.search);
+  const articleId = urlParams.get('id');
+  const E = XZAI_ENGINE;
+
+  if (!articleId) { window.location.href = 'news.html'; return; }
+
+  // Fetch article from Supabase
+  console.log('🔄 Loading article:', articleId);
+  let article;
+  
+  try {
+    const response = await E.fetchOne('ai_articles', articleId);
+    article = response;
+    console.log('✅ Article loaded:', article?.title);
+  } catch(e) { 
+    console.error('❌ Error loading article:', e);
+    article = null; 
+  }
+
+  if (!article) {
+    console.warn('⚠️ Article not found, redirecting to news.html');
+    window.location.href = 'news.html';
+    return;
+  }
+
+  // Update meta
+  document.title = `${article.title} | XZAI`;
+  document.querySelector('meta[name="description"]')?.setAttribute('content', article.excerpt || '');
+  // Update og:image dynamically
+  if (article.image_url) {
+    document.querySelector('meta[property="og:image"]')?.setAttribute('content', article.image_url);
+  }
+  document.querySelector('meta[property="og:title"]')?.setAttribute('content', article.title + ' | XZAI');
+
+  // Breadcrumb
+  const bcCat = document.getElementById('bcCategory');
+  if (bcCat) { bcCat.textContent = E.categoryLabel(article.category); bcCat.href = `news.html?cat=${article.category}`; }
+  const bcTitle = document.getElementById('bcTitle');
+  if (bcTitle) { bcTitle.textContent = article.title.substring(0, 50) + (article.title.length > 50 ? '…' : ''); }
+
+  // Show content
+  document.getElementById('articleSkeleton').style.display = 'none';
+  document.getElementById('articleContent').style.display = '';
+
+  // Hero image
+  const heroImg = document.getElementById('articleHeroImg');
+  if (heroImg) { heroImg.src = article.image_url || ''; heroImg.alt = article.title; }
+
+  // Category badge
+  const catBadgeEl = document.getElementById('articleCatBadge');
+  if (catBadgeEl) catBadgeEl.innerHTML = `${E.categoryIcon(article.category)} ${E.categoryLabel(article.category)}`;
+
+  // Title
+  document.getElementById('articleTitle').textContent = article.title;
+
+  // Meta
+  const pubDate = article.published_at ? new Date(article.published_at).toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'}) : '';
+  document.getElementById('articleMeta').innerHTML = `
+    <span><i class="fas fa-user"></i> <strong>${article.author || 'XZAI Staff'}</strong></span>
+    <span><i class="fas fa-calendar"></i> ${pubDate}</span>
+    <span><i class="fas fa-eye"></i> ${E.formatNum(article.views || 0)} views</span>
+    <span><i class="fas fa-book-open"></i> ${article.read_time || 5} min read</span>`;
+
+  // Body
+  document.getElementById('articleBody').innerHTML = article.content || `<p>${article.excerpt || ''}</p>`;
+
+  // Tags
+  const tagsArr = Array.isArray(article.tags) ? article.tags : (article.tags ? article.tags.split(',') : []);
+  const tagsContainer = document.getElementById('articleTags');
+  if (tagsContainer && tagsArr.length) {
+    tagsContainer.innerHTML = tagsArr.map(t => `<a href="news.html?q=${encodeURIComponent(t.trim())}" class="tag">${t.trim()}</a>`).join('');
+    document.getElementById('articleTagsWrap').style.display = '';
+  } else {
+    document.getElementById('articleTagsWrap').style.display = 'none';
+  }
+
+  // Author bio
+  const initials = (article.author || 'XZ').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+  document.getElementById('authorAv').textContent = initials;
+  document.getElementById('authorName').textContent = article.author || 'XZAI Staff';
+
+  // Increment views (once per session)
+  const viewedKey = `xz-viewed-${articleId}`;
+  if (!sessionStorage.getItem(viewedKey)) {
+    sessionStorage.setItem(viewedKey, '1');
+    try {
+      // Update view count in Supabase
+      if (window.supabaseClient) {
+        await window.supabaseClient
+          .from('articles')
+          .update({ view_count: (article.view_count || 0) + 1 })
+          .eq('id', articleId);
+        console.log('✅ View count updated');
+      }
+    } catch(e) {
+      console.error('❌ Error updating views:', e);
+    }
+  }
+
+  // Trending sidebar
+  try {
+    console.log('🔄 Loading trending articles...');
+    const trData = await E.fetchTable('ai_articles', { 
+      sort: 'view_count', 
+      order: 'desc',
+      limit: 5 
+    });
+    
+    const trendingEl = document.getElementById('articleTrending');
+    if (trendingEl && trData.data?.length) {
+      console.log('✅ Loaded', trData.data.length, 'trending articles');
+      trendingEl.innerHTML = trData.data
+        .filter(a => a.id !== articleId)
+        .slice(0, 4)
+        .map((a, i) => `
+          <div class="trending-item">
+            <div class="trending-num">${i + 1}</div>
+            <div>
+              <div class="trending-title"><a href="article.html?id=${a.id}" style="color:var(--text2)">${a.title}</a></div>
+              <span class="trending-views"><i class="fas fa-eye"></i> ${E.formatNum(a.view_count || 0)}</span>
+            </div>
+          </div>`).join('');
+    } else {
+      console.warn('⚠️ No trending articles found');
+    }
+  } catch(e) {
+    console.error('❌ Error loading trending:', e);
+  }
+
+  // Related articles
+  try {
+    console.log('🔄 Loading related articles...');
+    const relData = await E.fetchTable('ai_articles', { 
+      limit: 20
+    });
+    
+    const related = (relData.data || [])
+      .filter(a => a.id !== articleId && a.category === article.category)
+      .slice(0, 3);
+      
+    const relGrid = document.getElementById('relatedGrid');
+    if (relGrid && related.length) {
+      console.log('✅ Loaded', related.length, 'related articles');
+      relGrid.innerHTML = related.map(a => E.buildArticleCard(a)).join('');
+    } else {
+      console.warn('⚠️ No related articles found');
+      document.getElementById('relatedWrap').style.display = 'none';
+    }
+  } catch(e) {
+    console.error('❌ Error loading related articles:', e);
+  }
+
+  // Reveal animations
+  E.initReveal();
+});
+
+function shareArticle(platform) {
+  const url = encodeURIComponent(window.location.href);
+  const title = encodeURIComponent(document.title);
+  const links = {
+    twitter:  `https://twitter.com/intent/tweet?url=${url}&text=${title}`,
+    linkedin: `https://www.linkedin.com/shareArticle?mini=true&url=${url}&title=${title}`,
+    whatsapp: `https://wa.me/?text=${title}%20${url}`,
+    copy: null
+  };
+  if (platform === 'copy') {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      XZAI_ENGINE.toast('Link copied!', 'success');
+    });
+  } else if (links[platform]) {
+    window.open(links[platform], '_blank', 'noopener');
+  }
+}
+
+function subscribeNewsletter2(e) {
+  e.preventDefault();
+  const email = document.getElementById('nlEmail2').value.trim();
+  if (!email) return;
+  
+  if (window.XZAI_ENGINE) {
+    XZAI_ENGINE.subscribe(email, 'article-sidebar').then(r => {
+      if (r.success) {
+        document.getElementById('nlEmail2').value = '';
+        document.getElementById('nlMsg2').style.display = 'block';
+        setTimeout(() => { 
+          document.getElementById('nlMsg2').style.display = 'none'; 
+        }, 5000);
+      }
+      XZAI_ENGINE.toast(r.message, r.success ? 'success' : 'error');
+    });
+  }
+}
+</script>
+<script src="js/xzai-features.js"></script>
+<script src="js/analytics.js"></script>
+<script src="js/push-notifications.js"></script>
+</body>
+</html>

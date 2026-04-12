@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 – Page Not Found | XZAI</title>
+  <meta name="robots" content="noindex">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#7c3aed">
+  <link rel="icon" href="images/logo-xzai.webp">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;0,9..40,900;1,9..40,400&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <style>html,body{background:#050505!important;color:#fff!important}</style>
+  <script>(function(){localStorage.setItem('xz-theme','dark');document.documentElement.setAttribute('data-theme','dark');document.documentElement.style.background='#050505';})();</script>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo" aria-label="XZAI Home">
+      <div class="logo-x">X</div><div class="logo-z">Z</div><div class="logo-ai">AI</div>
+    </a>
+    <ul class="nav-menu" id="navMenu">
+      <li><a href="index.html"      class="nav-link">Home</a></li>
+      <li><a href="news.html"       class="nav-link">AI News</a></li>
+      <li><a href="tools.html"      class="nav-link">AI Tools</a></li>
+      <li><a href="reviews.html"    class="nav-link">Reviews</a></li>
+      <li><a href="free-tools.html" class="nav-link">Free Tools</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle theme"><i class="fas fa-moon"></i></button>
+      <button class="hamburger" id="hamburger" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</nav>
+
+<!-- 404 CONTENT -->
+<div class="not-found">
+  <div class="not-found-code">404</div>
+  <h1 class="not-found-title">Page Not Found</h1>
+  <p class="not-found-desc">The page you're looking for has been moved, deleted, or never existed.<br>Even the most advanced AI can't find it.</p>
+
+  <div style="display:inline-grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:32px;text-align:left;max-width:400px;width:100%">
+    <a href="index.html" class="sidebar-widget" style="text-decoration:none;display:flex;align-items:center;gap:12px">
+      <i class="fas fa-house" style="color:var(--accent);width:20px;text-align:center"></i>
+      <div>
+        <div style="font-weight:700;font-size:0.88rem;color:var(--text)">Homepage</div>
+        <div style="font-size:0.72rem;color:var(--muted)">Back to home</div>
+      </div>
+    </a>
+    <a href="news.html" class="sidebar-widget" style="text-decoration:none;display:flex;align-items:center;gap:12px">
+      <i class="fas fa-newspaper" style="color:var(--accent);width:20px;text-align:center"></i>
+      <div>
+        <div style="font-weight:700;font-size:0.88rem;color:var(--text)">AI News</div>
+        <div style="font-size:0.72rem;color:var(--muted)">Latest headlines</div>
+      </div>
+    </a>
+    <a href="tools.html" class="sidebar-widget" style="text-decoration:none;display:flex;align-items:center;gap:12px">
+      <i class="fas fa-tools" style="color:var(--accent);width:20px;text-align:center"></i>
+      <div>
+        <div style="font-weight:700;font-size:0.88rem;color:var(--text)">AI Tools</div>
+        <div style="font-size:0.72rem;color:var(--muted)">Curated</div>
+      </div>
+    </a>
+    <a href="free-tools.html" class="sidebar-widget" style="text-decoration:none;display:flex;align-items:center;gap:12px">
+      <i class="fas fa-gift" style="color:var(--accent);width:20px;text-align:center"></i>
+      <div>
+        <div style="font-weight:700;font-size:0.88rem;color:var(--text)">Free Tools</div>
+        <div style="font-size:0.72rem;color:var(--muted)">No card needed</div>
+      </div>
+    </a>
+  </div>
+
+  <div>
+    <a href="index.html" class="btn btn-primary btn-lg"><i class="fas fa-home"></i> Back to XZAI</a>
+  </div>
+  <div style="margin-top:20px;font-size:0.8rem;color:var(--muted)">
+    Think this is a mistake? <a href="contact.html" style="color:var(--accent)">Let us know →</a>
+  </div>
+</div>
+
+<script src="js/main.js"></script>
+</body>
+</html>

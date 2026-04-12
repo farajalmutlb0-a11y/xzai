@@ -1,0 +1,483 @@
+// =====================================================
+// XZAI.ai Frontend Security Module
+// =====================================================
+
+class XZAISecurity {
+  constructor() {
+    // سيتم تحميل القيم من ملف config
+    this.supabaseUrl = null;
+    this.supabaseKey = null;
+    this.supabase = null;
+    this.loadConfig();
+  }
+
+  // تحميل Config من ملف خارجي
+  async loadConfig() {
+    try {
+      // محاولة تحميل من config.js
+      if (typeof window.XZAI_CONFIG !== 'undefined') {
+        this.supabaseUrl = window.XZAI_CONFIG.SUPABASE_URL;
+        this.supabaseKey = window.XZAI_CONFIG.SUPABASE_ANON_KEY;
+      } else {
+        // Fallback: محاولة fetch من ملف config
+        const response = await fetch('/config.json');
+        if (response.ok) {
+          const config = await response.json();
+          this.supabaseUrl = config.SUPABASE_URL;
+          this.supabaseKey = config.SUPABASE_ANON_KEY;
+        }
+      }
+      
+      if (this.supabaseUrl && this.supabaseKey) {
+        await this.initSupabase();
+      } else {
+        console.warn('[XZAI Security] Supabase not configured. Some features will be limited.');
+      }
+    } catch (error) {
+      console.error('[XZAI Security] Config load error:', error);
+    }
+  }
+
+  // =====================================================
+  // 1. Initialize Supabase Client
+  // =====================================================
+  async initSupabase() {
+    try {
+      const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+      this.supabase = createClient(this.supabaseUrl, this.supabaseKey);
+      console.log('✅ Supabase initialized');
+    } catch (error) {
+      console.error('❌ Failed to initialize Supabase:', error);
+    }
+  }
+
+  // =====================================================
+  // 2. XSS Protection
+  // =====================================================
+  sanitizeHTML(html) {
+    const div = document.createElement('div');
+    div.textContent = html;
+    return div.innerHTML;
+  }
+
+  sanitizeInput(input) {
+    if (typeof input !== 'string') return input;
+    return input
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#x27;')
+      .replace(/\//g, '&#x2F;');
+  }
+
+  // =====================================================
+  // 3. Email Validation
+  // =====================================================
+  validateEmail(email) {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  }
+
+  normalizeEmail(email) {
+    return email.toLowerCase().trim();
+  }
+
+  // =====================================================
+  // 4. Rate Limiting (Client Side)
+  // =====================================================
+  checkRateLimit(action, maxAttempts = 3, windowMinutes = 60) {
+    const key = `rateLimit_${action}`;
+    const now = Date.now();
+    const windowMs = windowMinutes * 60 * 1000;
+
+    let attempts = JSON.parse(localStorage.getItem(key) || '[]');
+    
+    // تنظيف المحاولات القديمة
+    attempts = attempts.filter(timestamp => now - timestamp < windowMs);
+
+    if (attempts.length >= maxAttempts) {
+      const oldestAttempt = Math.min(...attempts);
+      const waitTime = Math.ceil((windowMs - (now - oldestAttempt)) / 60000);
+      throw new Error(`تجاوزت الحد الأقصى. يرجى المحاولة بعد ${waitTime} دقيقة`);
+    }
+
+    attempts.push(now);
+    localStorage.setItem(key, JSON.stringify(attempts));
+    return true;
+  }
+
+  // =====================================================
+  // 5. Safe Newsletter Subscribe
+  // =====================================================
+  async subscribeNewsletter(email, name = null) {
+    try {
+      // Validation
+      if (!email) throw new Error('البريد الإلكتروني مطلوب');
+      if (!this.validateEmail(email)) throw new Error('البريد الإلكتروني غير صحيح');
+
+      // Rate limiting
+      this.checkRateLimit('newsletter_subscribe', 3, 60);
+
+      // Normalize
+      email = this.normalizeEmail(email);
+      name = name ? this.sanitizeInput(name) : null;
+
+      // Get IP (من external service)
+      let ipAddress = null;
+      try {
+        const ipResponse = await fetch('https://api.ipify.org?format=json');
+        const ipData = await ipResponse.json();
+        ipAddress = ipData.ip;
+      } catch (e) {
+        console.warn('Could not fetch IP');
+      }
+
+      // Subscribe via Supabase function (secure)
+      const { data, error } = await this.supabase.rpc('subscribe_newsletter', {
+        p_email: email,
+        p_name: name,
+        p_ip: ipAddress,
+        p_user_agent: navigator.userAgent
+      });
+
+      if (error) throw error;
+
+      return {
+        success: true,
+        message: 'تم الاشتراك بنجاح! تحقق من بريدك الإلكتروني.',
+        data
+      };
+
+    } catch (error) {
+      console.error('[SECURITY] Subscribe error:', error);
+      return {
+        success: false,
+        message: error.message || 'حدث خطأ. يرجى المحاولة لاحقاً.'
+      };
+    }
+  }
+
+  // =====================================================
+  // 6. Safe Contact Form Submit
+  // =====================================================
+  async submitContactForm(formData) {
+    try {
+      // Validation
+      const { name, email, subject, message, company } = formData;
+
+      if (!name || name.length < 2) throw new Error('الاسم مطلوب (حرفين على الأقل)');
+      if (!email || !this.validateEmail(email)) throw new Error('البريد الإلكتروني غير صحيح');
+      if (!subject || subject.length < 5) throw new Error('الموضوع مطلوب (5 أحرف على الأقل)');
+      if (!message || message.length < 20) throw new Error('الرسالة مطلوبة (20 حرف على الأقل)');
+
+      // Rate limiting
+      this.checkRateLimit('contact_form', 3, 60);
+
+      // Sanitize
+      const sanitizedData = {
+        name: this.sanitizeInput(name),
+        email: this.normalizeEmail(email),
+        subject: this.sanitizeInput(subject),
+        message: this.sanitizeInput(message),
+        company: company ? this.sanitizeInput(company) : null
+      };
+
+      // Get IP
+      let ipAddress = null;
+      try {
+        const ipResponse = await fetch('https://api.ipify.org?format=json');
+        const ipData = await ipResponse.json();
+        ipAddress = ipData.ip;
+      } catch (e) {
+        console.warn('Could not fetch IP');
+      }
+
+      // Submit via Supabase function
+      const { data, error } = await this.supabase.rpc('send_contact_message', {
+        p_name: sanitizedData.name,
+        p_email: sanitizedData.email,
+        p_subject: sanitizedData.subject,
+        p_message: sanitizedData.message,
+        p_company: sanitizedData.company,
+        p_ip: ipAddress,
+        p_user_agent: navigator.userAgent
+      });
+
+      if (error) throw error;
+
+      return {
+        success: true,
+        message: 'تم إرسال رسالتك بنجاح! سنرد عليك قريباً.',
+        data
+      };
+
+    } catch (error) {
+      console.error('[SECURITY] Contact form error:', error);
+      return {
+        success: false,
+        message: error.message || 'حدث خطأ. يرجى المحاولة لاحقاً.'
+      };
+    }
+  }
+
+  // =====================================================
+  // 7. Get Articles (Safe)
+  // =====================================================
+  async getArticles(options = {}) {
+    try {
+      const {
+        limit = 10,
+        offset = 0,
+        category = null,
+        orderBy = 'published_at',
+        ascending = false
+      } = options;
+
+      let query = this.supabase
+        .from('ai_articles')
+        .select('*')
+        .eq('status', 'published')
+        .range(offset, offset + limit - 1)
+        .order(orderBy, { ascending });
+
+      if (category) {
+        query = query.eq('category', category);
+      }
+
+      const { data, error, count } = await query;
+
+      if (error) throw error;
+
+      return {
+        success: true,
+        articles: data,
+        total: count,
+        hasMore: offset + limit < count
+      };
+
+    } catch (error) {
+      console.error('[SECURITY] Get articles error:', error);
+      return {
+        success: false,
+        message: 'فشل جلب المقالات',
+        articles: []
+      };
+    }
+  }
+
+  // =====================================================
+  // 8. Get Single Article (Safe + View Count)
+  // =====================================================
+  async getArticle(slug) {
+    try {
+      if (!slug || typeof slug !== 'string') {
+        throw new Error('Slug invalid');
+      }
+
+      // Get article
+      const { data, error } = await this.supabase
+        .from('ai_articles')
+        .select('*')
+        .eq('slug', slug)
+        .eq('status', 'published')
+        .single();
+
+      if (error) throw error;
+      if (!data) throw new Error('Article not found');
+
+      // Increment views (via secure function)
+      await this.supabase.rpc('increment_article_views', { p_slug: slug });
+
+      return {
+        success: true,
+        article: data
+      };
+
+    } catch (error) {
+      console.error('[SECURITY] Get article error:', error);
+      return {
+        success: false,
+        message: 'المقال غير موجود',
+        article: null
+      };
+    }
+  }
+
+  // =====================================================
+  // 9. CSRF Protection (للـ forms)
+  // =====================================================
+  generateCSRFToken() {
+    const token = Array.from(crypto.getRandomValues(new Uint8Array(32)))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+    sessionStorage.setItem('csrf_token', token);
+    return token;
+  }
+
+  getCSRFToken() {
+    let token = sessionStorage.getItem('csrf_token');
+    if (!token) {
+      token = this.generateCSRFToken();
+    }
+    return token;
+  }
+
+  validateCSRFToken(token) {
+    const storedToken = sessionStorage.getItem('csrf_token');
+    return token === storedToken;
+  }
+
+  // =====================================================
+  // 10. Content Security Policy Helper
+  // =====================================================
+  loadExternalScript(src, integrity = null) {
+    return new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = src;
+      script.async = true;
+      
+      if (integrity) {
+        script.integrity = integrity;
+        script.crossOrigin = 'anonymous';
+      }
+
+      script.onload = () => resolve(script);
+      script.onerror = () => reject(new Error(`Failed to load script: ${src}`));
+
+      document.head.appendChild(script);
+    });
+  }
+
+  // =====================================================
+  // 11. Honeypot Field (Anti-Bot)
+  // =====================================================
+  createHoneypot(formElement) {
+    const honeypot = document.createElement('input');
+    honeypot.type = 'text';
+    honeypot.name = 'website'; // bots will fill this
+    honeypot.style.position = 'absolute';
+    honeypot.style.left = '-9999px';
+    honeypot.style.width = '1px';
+    honeypot.style.height = '1px';
+    honeypot.setAttribute('tabindex', '-1');
+    honeypot.setAttribute('autocomplete', 'off');
+    formElement.appendChild(honeypot);
+    return honeypot;
+  }
+
+  checkHoneypot(formElement) {
+    const honeypot = formElement.querySelector('input[name="website"]');
+    if (honeypot && honeypot.value !== '') {
+      console.warn('[SECURITY] Bot detected via honeypot');
+      return false; // Bot detected
+    }
+    return true; // Human
+  }
+
+  // =====================================================
+  // 12. Secure Local Storage
+  // =====================================================
+  secureSetItem(key, value) {
+    try {
+      const encrypted = btoa(JSON.stringify(value)); // Base64 encoding (basic)
+      localStorage.setItem(key, encrypted);
+    } catch (error) {
+      console.error('[SECURITY] Failed to save to localStorage:', error);
+    }
+  }
+
+  secureGetItem(key) {
+    try {
+      const encrypted = localStorage.getItem(key);
+      if (!encrypted) return null;
+      return JSON.parse(atob(encrypted));
+    } catch (error) {
+      console.error('[SECURITY] Failed to read from localStorage:', error);
+      return null;
+    }
+  }
+
+  // =====================================================
+  // 13. Detect Suspicious Behavior
+  // =====================================================
+  monitorSuspiciousActivity() {
+    let clickCount = 0;
+    let keyPressCount = 0;
+    const startTime = Date.now();
+
+    // مراقبة الكليكات السريعة
+    document.addEventListener('click', () => {
+      clickCount++;
+      const elapsedSeconds = (Date.now() - startTime) / 1000;
+      
+      if (clickCount > 50 && elapsedSeconds < 10) {
+        console.warn('[SECURITY] Suspicious click behavior detected');
+        this.reportSuspiciousActivity('rapid_clicks');
+      }
+    });
+
+    // مراقبة الضغط السريع على المفاتيح
+    document.addEventListener('keypress', () => {
+      keyPressCount++;
+      const elapsedSeconds = (Date.now() - startTime) / 1000;
+      
+      if (keyPressCount > 100 && elapsedSeconds < 10) {
+        console.warn('[SECURITY] Suspicious keyboard behavior detected');
+        this.reportSuspiciousActivity('rapid_keypress');
+      }
+    });
+
+    // مراقبة DevTools
+    let devtools = false;
+    const threshold = 160;
+    const check = () => {
+      if (window.outerWidth - window.innerWidth > threshold || 
+          window.outerHeight - window.innerHeight > threshold) {
+        if (!devtools) {
+          devtools = true;
+          console.warn('[SECURITY] DevTools opened');
+        }
+      } else {
+        devtools = false;
+      }
+    };
+    setInterval(check, 1000);
+  }
+
+  async reportSuspiciousActivity(type) {
+    try {
+      await this.supabase.from('audit_logs').insert({
+        action: 'suspicious_activity',
+        table_name: 'frontend',
+        new_data: { type, timestamp: new Date().toISOString() },
+        ip_address: await this.getIP(),
+        user_agent: navigator.userAgent
+      });
+    } catch (error) {
+      console.error('Failed to report suspicious activity:', error);
+    }
+  }
+
+  async getIP() {
+    try {
+      const response = await fetch('https://api.ipify.org?format=json');
+      const data = await response.json();
+      return data.ip;
+    } catch {
+      return null;
+    }
+  }
+}
+
+// =====================================================
+// Initialize Security Module
+// =====================================================
+const xzaiSecurity = new XZAISecurity();
+
+// Monitor suspicious activity
+xzaiSecurity.monitorSuspiciousActivity();
+
+// Export globally
+window.xzaiSecurity = xzaiSecurity;
+
+console.log('🔐 XZAI Security Module loaded');

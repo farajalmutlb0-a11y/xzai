@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تسجيل الدخول - XZAI Admin</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#7c3aed">
+  <link rel="icon" href="images/logo-xzai.webp">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;0,9..40,900;1,9..40,400&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .login-container {
+      background: #16162a;
+      border: 1px solid rgba(124, 58, 237, 0.3);
+      border-radius: 20px;
+      padding: 48px 40px;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
+                  0 0 100px rgba(124, 58, 237, 0.1);
+    }
+    
+    .logo {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    
+    .logo h1 {
+      font-size: 36px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #7c3aed, #06b6d4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+    
+    .logo p {
+      color: #94a3b8;
+      font-size: 14px;
+    }
+    
+    .form-group {
+      margin-bottom: 24px;
+    }
+    
+    .form-group label {
+      display: block;
+      color: #f1f5f9;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    
+    .form-group input {
+      width: 100%;
+      padding: 14px 16px;
+      background: #1e1e35;
+      border: 1px solid rgba(124, 58, 237, 0.3);
+      border-radius: 10px;
+      color: #f1f5f9;
+      font-size: 15px;
+      transition: all 0.3s;
+    }
+    
+    .form-group input:focus {
+      outline: none;
+      border-color: #7c3aed;
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+    }
+    
+    .login-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #7c3aed, #6d28d9);
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 8px;
+    }
+    
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(124, 58, 237, 0.3);
+    }
+    
+    .login-btn:active {
+      transform: translateY(0);
+    }
+    
+    .login-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .error-message {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 8px;
+      padding: 12px;
+      color: #ef4444;
+      font-size: 13px;
+      margin-bottom: 20px;
+      display: none;
+      text-align: center;
+    }
+    
+    .error-message.show {
+      display: block;
+      animation: shake 0.5s;
+    }
+    
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      75% { transform: translateX(10px); }
+    }
+    
+    .security-note {
+      margin-top: 24px;
+      padding: 16px;
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.2);
+      border-radius: 10px;
+      text-align: center;
+    }
+    
+    .security-note i {
+      color: #06b6d4;
+      font-size: 20px;
+      margin-bottom: 8px;
+    }
+    
+    .security-note p {
+      color: #94a3b8;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+    
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 20px;
+      color: #7c3aed;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    
+    .back-link:hover {
+      text-decoration: underline;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .loading.show {
+      display: block;
+    }
+
+    .spinner {
+      border: 3px solid rgba(124, 58, 237, 0.3);
+      border-top: 3px solid #7c3aed;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="logo">
+      <h1>⚡ XZAI</h1>
+      <p>لوحة التحكم الإدارية</p>
+    </div>
+
+    <div id="errorMessage" class="error-message"></div>
+
+    <form id="loginForm" onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label for="password">كلمة السر</label>
+        <input 
+          type="password" 
+          id="password" 
+          placeholder="أدخل كلمة السر" 
+          required
+          autocomplete="current-password"
+        >
+      </div>
+
+      <button type="submit" id="loginBtn" class="login-btn">
+        تسجيل الدخول
+      </button>
+    </form>
+
+    <div id="loading" class="loading">
+      <div class="spinner"></div>
+      <p style="color: #94a3b8; margin-top: 12px; font-size: 13px;">جاري التحقق...</p>
+    </div>
+
+    <div class="security-note">
+      <i class="fas fa-shield-alt"></i>
+      <p>
+        هذه الصفحة محمية بنظام أمان متقدم<br>
+        3 محاولات فاشلة = حظر لمدة 15 دقيقة
+      </p>
+    </div>
+
+    <a href="index.html" class="back-link">
+      ← العودة للموقع
+    </a>
+  </div>
+
+  <script src="js/admin-auth.js"></script>
+  <script>
+    // Focus على حقل كلمة السر
+    document.getElementById('password').focus();
+
+    // فحص إذا كان مسجل دخول بالفعل
+    (async function() {
+      const isAuth = await adminAuth.isAuthenticated();
+      if (isAuth) {
+        window.location.href = 'admin.html';
+      }
+    })();
+
+    async function handleLogin(event) {
+      event.preventDefault();
+
+      const password = document.getElementById('password').value;
+      const errorMsg = document.getElementById('errorMessage');
+      const loginBtn = document.getElementById('loginBtn');
+      const loading = document.getElementById('loading');
+      const form = document.getElementById('loginForm');
+
+      // إخفاء رسالة الخطأ السابقة
+      errorMsg.classList.remove('show');
+
+      // إظهار loading
+      form.style.display = 'none';
+      loading.classList.add('show');
+      loginBtn.disabled = true;
+
+      try {
+        // محاولة تسجيل الدخول
+        await adminAuth.login(password);
+
+        // نجح تسجيل الدخول
+        errorMsg.textContent = '✅ تم تسجيل الدخول بنجاح!';
+        errorMsg.style.background = 'rgba(16, 185, 129, 0.1)';
+        errorMsg.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+        errorMsg.style.color = '#10b981';
+        errorMsg.classList.add('show');
+
+        // إعادة التوجيه بعد ثانية
+        setTimeout(() => {
+          window.location.href = 'admin.html';
+        }, 1000);
+
+      } catch (error) {
+        // فشل تسجيل الدخول
+        loading.classList.remove('show');
+        form.style.display = 'block';
+        loginBtn.disabled = false;
+
+        errorMsg.textContent = `❌ ${error.message}`;
+        errorMsg.style.background = 'rgba(239, 68, 68, 0.1)';
+        errorMsg.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+        errorMsg.style.color = '#ef4444';
+        errorMsg.classList.add('show');
+
+        // مسح حقل كلمة السر
+        document.getElementById('password').value = '';
+        document.getElementById('password').focus();
+      }
+    }
+
+    // Enter للإرسال
+    document.getElementById('password').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        handleLogin(e);
+      }
+    });
+  </script>
+</body>
+</html>

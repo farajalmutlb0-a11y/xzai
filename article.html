@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About XZAI – The #1 AI News & Tools Platform</title>
+  <meta name="description" content="Learn about XZAI — our mission, team, editorial standards, and the story behind the #1 independent AI news and tools platform.">
+  <meta property="og:description" content="Learn about XZAI — our mission, team, editorial standards, and the story behind the #1 independent AI news and tools platform.">
+  <meta property="og:title" content="About XZAI | AI News & Tools">
+  <meta property="og:image" content="https://xzai.ai/images/logo-xzai.webp">
+  <link rel="canonical" href="https://xzai.ai/about.html">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#7c3aed">
+  <link rel="icon" href="images/logo-xzai.webp">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;0,9..40,900;1,9..40,400&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/grok-theme.css">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BMBBHWQBZ5"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-BMBBHWQBZ5');</script>
+  <style>html,body{background:#050505!important;color:#fff!important}</style>
+  <script src="js/config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-helper.js"></script>
+  <script>(function(){localStorage.setItem('xz-theme','dark');document.documentElement.setAttribute('data-theme','dark');document.documentElement.style.background='#050505';})();</script>
+</head>
+<body>
+
+<div id="read-progress"></div>
+
+<!-- SEARCH OVERLAY -->
+<div class="search-overlay" id="searchOverlay">
+  <div class="search-box">
+    <i class="fas fa-search search-icon"></i>
+    <input type="text" id="searchInput" placeholder="Search AI news, tools, reviews…" autocomplete="off">
+    <button class="search-close" onclick="closeSearch()"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="search-results" id="searchResults"></div>
+</div>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo" aria-label="XZAI Home">
+      <div class="logo-x">X</div><div class="logo-z">Z</div><div class="logo-ai">AI</div>
+    </a>
+    <ul class="nav-menu" id="navMenu">
+      <li><a href="index.html" class="nav-link">Home</a></li>
+      <li class="nav-dropdown">
+        <a href="news.html" class="nav-link">AI News <i class="fas fa-chevron-down" style="font-size:0.6rem;margin-left:3px"></i></a>
+        <div class="dropdown-panel">
+          <a href="news.html?cat=openai"    class="dp-item"><i class="fas fa-robot"></i> OpenAI / ChatGPT</a>
+          <a href="news.html?cat=xai"       class="dp-item"><i class="fas fa-bolt"></i> xAI / Grok</a>
+          <a href="news.html?cat=google"    class="dp-item"><i class="fab fa-google"></i> Google / Gemini</a>
+          <a href="news.html?cat=anthropic" class="dp-item"><i class="fas fa-brain"></i> Anthropic / Claude</a>
+          <a href="news.html?cat=meta"      class="dp-item"><i class="fas fa-cubes"></i> Meta AI</a>
+          <a href="news.html?cat=research"  class="dp-item"><i class="fas fa-flask"></i> Research</a>
+          <a href="news.html?cat=policy"    class="dp-item"><i class="fas fa-gavel"></i> Policy &amp; Law</a>
+          <a href="news.html"               class="dp-item"><i class="fas fa-globe"></i> All News</a>
+        </div>
+      </li>
+      <li><a href="tools.html"      class="nav-link">AI Tools</a></li>
+      <li><a href="reviews.html"    class="nav-link">Reviews</a></li>
+      <li><a href="free-tools.html" class="nav-link">Free Tools</a></li>
+      <li><a href="about.html"      class="nav-link active">About</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="nav-search-btn" onclick="openSearch()" aria-label="Search"><i class="fas fa-search"></i></button>
+      
+      <a href="newsletter.html" class="btn-nav"><i class="fas fa-envelope"></i> Newsletter</a>
+      <button class="hamburger" id="hamburger" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</nav>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="page-hero-label"><i class="fas fa-rocket"></i> Our Story</div>
+    <h1 class="page-hero-title">About XZAI</h1>
+    <p class="page-hero-desc">A team of AI researchers, journalists, and technologists on a mission to make artificial intelligence accessible, understandable, and useful for everyone.</p>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="container">
+
+  <!-- Mission & Story -->
+  <div class="about-grid">
+    <div class="about-text">
+      <div class="section-label">Our Story</div>
+      <h2>We Built XZAI Because AI News Was Broken</h2>
+      <p>In 2025, AI was moving at an impossible pace. New models, tools, and breakthroughs were announced every single day — but coverage was either too technical for regular people, too shallow for professionals, or buried under clickbait headlines.</p>
+      <p>We built XZAI to fix that. Our platform covers every significant AI development with the depth professionals demand and the clarity everyone deserves. No jargon without explanation. No hype without analysis.</p>
+      <p>Today, AI professionals, researchers, marketers, and curious minds trust XZAI as their daily source for what's actually happening in artificial intelligence.</p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:28px">
+        <a href="news.html" class="btn btn-primary"><i class="fas fa-newspaper"></i> Read Our Coverage</a>
+        <a href="contact.html" class="btn btn-outline"><i class="fas fa-envelope"></i> Get in Touch</a>
+      </div>
+    </div>
+    <div>
+      <div class="about-stats-box">
+        <h3>Our Numbers</h3>
+        <div class="about-stats-grid">
+          <div class="about-stat">
+            <div class="stat-num" style="font-size:1.8rem" id="about-stat-articles">—</div>
+            <div class="stat-label">Monthly Readers</div>
+          </div>
+          <div class="about-stat">
+            <div class="stat-num" style="font-size:1.8rem">2,847</div>
+            <div class="stat-label">Articles Written</div>
+          </div>
+          <div class="about-stat">
+            <div class="stat-num" style="font-size:1.8rem">Daily</div>
+            <div class="stat-label">Tools Reviewed</div>
+          </div>
+          <div class="about-stat">
+            <div class="stat-num" style="font-size:1.8rem">98</div>
+            <div class="stat-label">Countries Reached</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Our Values -->
+  <section class="section-sm">
+    <div style="text-align:center;margin-bottom:40px">
+      <div class="section-label">What We Stand For</div>
+      <h2 class="section-title">Our Core Values</h2>
+    </div>
+    <div class="values-grid">
+      <div class="value-card reveal">
+        <div class="value-icon"><i class="fas fa-bullseye"></i></div>
+        <div class="value-title">Accuracy First</div>
+        <div class="value-desc">Every fact is verified before publication. We'd rather be second than wrong. Corrections are made immediately and transparently.</div>
+      </div>
+      <div class="value-card reveal">
+        <div class="value-icon"><i class="fas fa-lightbulb"></i></div>
+        <div class="value-title">Clarity Always</div>
+        <div class="value-desc">Complex AI concepts explained clearly. No unnecessary jargon. We write for readers, not to impress other experts.</div>
+      </div>
+      <div class="value-card reveal">
+        <div class="value-icon"><i class="fas fa-scale-balanced"></i></div>
+        <div class="value-title">Editorial Independence</div>
+        <div class="value-desc">Our reviews and opinions are never for sale. Advertisers and affiliate partners cannot influence our editorial decisions.</div>
+      </div>
+      <div class="value-card reveal">
+        <div class="value-icon"><i class="fas fa-magnifying-glass"></i></div>
+        <div class="value-title">Transparency</div>
+        <div class="value-desc">We disclose all affiliate relationships. When we recommend a tool that earns us a commission, we say so clearly.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Team -->
+  <section class="section-sm">
+    <div style="text-align:center;margin-bottom:40px">
+      <div class="section-label">The Team</div>
+      <h2 class="section-title">People Behind XZAI</h2>
+    </div>
+    <div class="team-grid">
+      <div class="team-card reveal">
+        <div class="team-av"><i class="fas fa-user-tie"></i></div>
+        <div class="team-name">XZAI Team</div>
+        <div class="team-role">Founder &amp; Editor-in-Chief</div>
+        <p style="font-size:0.78rem;color:var(--muted);margin-top:10px;line-height:1.6">Former ML researcher at Google Brain. 8+ years covering AI. Oxford Computer Science graduate.</p>
+      </div>
+      <div class="team-card reveal">
+        <div class="team-av"><i class="fas fa-user-graduate"></i></div>
+        <div class="team-name">XZAI Research</div>
+        <div class="team-role">Research &amp; Science Editor</div>
+        <p style="font-size:0.78rem;color:var(--muted);margin-top:10px;line-height:1.6">PhD in Machine Learning from MIT. Specializes in AI safety, LLMs, and cutting-edge research translation.</p>
+      </div>
+      <div class="team-card reveal">
+        <div class="team-av"><i class="fas fa-user-pen"></i></div>
+        <div class="team-name">XZAI Reviews</div>
+        <div class="team-role">Tools &amp; Reviews Editor</div>
+        <p style="font-size:0.78rem;color:var(--muted);margin-top:10px;line-height:1.6">Software engineer turned tech journalist. Tests every AI tool personally before recommending it.</p>
+      </div>
+      <div class="team-card reveal">
+        <div class="team-av"><i class="fas fa-user-shield"></i></div>
+        <div class="team-name">XZAI Policy</div>
+        <div class="team-role">Business &amp; Policy Editor</div>
+        <p style="font-size:0.78rem;color:var(--muted);margin-top:10px;line-height:1.6">Former policy advisor. Covers AI regulation, enterprise adoption, and industry business news.</p>
+      </div>
+      <div class="team-card reveal">
+        <div class="team-av"><i class="fas fa-user-astronaut"></i></div>
+        <div class="team-name">XZAI Science</div>
+        <div class="team-role">Research Contributor</div>
+        <p style="font-size:0.78rem;color:var(--muted);margin-top:10px;line-height:1.6">AI researcher at Stanford University. Writes accessible summaries of the latest academic papers.</p>
+      </div>
+      <div class="team-card reveal">
+        <div class="team-av"><i class="fas fa-user-gear"></i></div>
+        <div class="team-name">XZAI Dev</div>
+        <div class="team-role">Developer AI Reporter</div>
+        <p style="font-size:0.78rem;color:var(--muted);margin-top:10px;line-height:1.6">Full-stack developer covering AI coding tools, APIs, and everything of interest to the developer community.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Timeline -->
+  <section class="section-sm" style="max-width:700px;margin:0 auto">
+    <div style="text-align:center;margin-bottom:40px">
+      <div class="section-label">Our Journey</div>
+      <h2 class="section-title">Milestones</h2>
+    </div>
+    <div class="milestone"><div class="milestone-date">2025</div><div class="milestone-text"><strong>XZAI is founded</strong> — Started as a platform dedicated to making AI news accessible, honest, and useful for everyone.</div></div>
+    
+    <div class="milestone"><div class="milestone-date">Aug 2025</div><div class="milestone-text"><strong>Launched AI Tools directory</strong> — Published our first comprehensive directory of 100+ AI tools with honest expert reviews.</div></div>
+    
+    <div class="milestone"><div class="milestone-date">Jan 2026</div><div class="milestone-text"><strong>xzai.ai domain launched</strong> — Upgraded to our permanent .ai domain and expanded the team to 6 full-time writers.</div></div>
+    <div class="milestone"><div class="milestone-date">2026</div><div class="milestone-text"><strong>Growing every day</strong> — Expanding our coverage, tools reviews, and community of AI enthusiasts worldwide.</div></div>
+  </section>
+
+</div>
+
+<!-- CTA -->
+<div class="newsletter-cta" style="margin-top:0">
+  <div class="container">
+    <div class="section-label">Work With Us</div>
+    <h2 class="section-title">Want to Collaborate?</h2>
+    <p class="section-desc" style="margin:8px auto 28px">We're always open to collaborations, guest articles, sponsorships, and speaking opportunities.</p>
+    <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
+      <a href="contact.html" class="btn btn-primary btn-lg"><i class="fas fa-envelope"></i> Contact Us</a>
+      <a href="newsletter.html" class="btn btn-outline btn-lg"><i class="fas fa-newspaper"></i> Subscribe</a>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:1px">
+            <span class="footer-logo-x">X</span>
+            <span class="footer-logo-zai">Z</span><span class="footer-logo-ai">AI</span>
+          </div>
+        </div>
+        <p class="footer-desc">Your #1 source for AI news, tool reviews, and expert analysis.</p>
+        <div class="footer-social">
+          <a href="https://x.com/xzaiai" class="social-btn" target="_blank" rel="noopener"><i class="fab fa-twitter"></i></a>
+          
+          
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Content</div>
+        <div class="footer-links">
+          <a href="news.html">AI News</a>
+          <a href="tools.html">AI Tools</a>
+          <a href="reviews.html">Reviews</a>
+          <a href="free-tools.html">Free AI Tools</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Company</div>
+        <div class="footer-links">
+          <a href="about.html">About Us</a>
+          <a href="contact.html">Contact</a>
+          <a href="newsletter.html">Newsletter</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Legal</div>
+        <div class="footer-links">
+          <a href="privacy.html">Privacy Policy</a>
+          <a href="terms.html">Terms of Service</a>
+          <a href="affiliate.html">Affiliate Disclosure</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 XZAI.ai</span>
+      <a href="sitemap.xml">Sitemap</a>
+    </div>
+  </div>
+</footer>
+
+<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})"><i class="fas fa-chevron-up"></i></button>
+
+<script src="js/main.js"></script>
+<script src="js/ai-engine.js"></script>
+<script src="js/xzai-features.js"></script>
+<script src="js/analytics.js"></script>
+<script src="js/push-notifications.js"></script>
+</body>
+</html>

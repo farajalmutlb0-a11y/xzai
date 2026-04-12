@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI News – Breaking Stories & Deep Analysis | XZAI</title>
+  <meta name="description" content="Breaking AI news updated daily. Coverage of OpenAI, Google, Anthropic, xAI, Meta and every major AI development. Trusted by AI professionals.">
+  <meta property="og:description" content="Breaking AI news updated daily. Coverage of OpenAI, Google, Anthropic, xAI, Meta and every major AI development. Trusted by AI professionals.">
+  <meta property="og:title" content="AI News | XZAI">
+  <meta property="og:image" content="https://xzai.ai/images/logo-xzai.webp">
+  <link rel="canonical" href="https://xzai.ai/news.html">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#7c3aed">
+  <link rel="icon" href="images/logo-xzai.webp">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;0,9..40,900;1,9..40,400&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/xzai-features.css">
+  <link rel="stylesheet" href="css/grok-theme.css">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BMBBHWQBZ5"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-BMBBHWQBZ5');</script>
+  <style>html,body{background:#050505!important;color:#fff!important}</style>
+  <script>(function(){localStorage.setItem('xz-theme','dark');document.documentElement.setAttribute('data-theme','dark');document.documentElement.style.background='#050505';})();</script>
+  <!-- Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+</head>
+<body>
+<div id="read-progress"></div>
+
+<!-- SEARCH OVERLAY -->
+<div class="search-overlay" id="searchOverlay">
+  <div class="search-box">
+    <i class="fas fa-search search-icon"></i>
+    <input type="text" id="searchInput" placeholder="Search AI news, tools, reviews…" autocomplete="off">
+    <button class="search-close" onclick="closeSearch()"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="search-results" id="searchResults"></div>
+</div>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo" aria-label="XZAI Home">
+      <div class="logo-x">X</div><div class="logo-z">Z</div><div class="logo-ai">AI</div>
+    </a>
+    <ul class="nav-menu" id="navMenu">
+      <li><a href="index.html" class="nav-link">Home</a></li>
+      <li class="nav-dropdown">
+        <a href="news.html" class="nav-link active">AI News <i class="fas fa-chevron-down" style="font-size:0.6rem;margin-left:3px"></i></a>
+        <div class="dropdown-panel">
+          <a href="news.html?cat=openai"    class="dp-item"><i class="fas fa-robot"></i> OpenAI / ChatGPT</a>
+          <a href="news.html?cat=xai"       class="dp-item"><i class="fas fa-bolt"></i> xAI / Grok</a>
+          <a href="news.html?cat=google"    class="dp-item"><i class="fab fa-google"></i> Google / Gemini</a>
+          <a href="news.html?cat=anthropic" class="dp-item"><i class="fas fa-brain"></i> Anthropic / Claude</a>
+          <a href="news.html?cat=meta"      class="dp-item"><i class="fas fa-cubes"></i> Meta AI</a>
+          <a href="news.html?cat=research"  class="dp-item"><i class="fas fa-flask"></i> Research</a>
+          <a href="news.html?cat=policy"    class="dp-item"><i class="fas fa-gavel"></i> Policy &amp; Law</a>
+          <a href="news.html"               class="dp-item"><i class="fas fa-globe"></i> All News</a>
+        </div>
+      </li>
+      <li><a href="tools.html"      class="nav-link">AI Tools</a></li>
+      <li><a href="reviews.html"    class="nav-link">Reviews</a></li>
+      <li><a href="free-tools.html" class="nav-link">Free Tools</a></li>
+      <li><a href="about.html"      class="nav-link">About</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="nav-search-btn" onclick="openSearch()" aria-label="Search"><i class="fas fa-search"></i></button>
+      
+      <a href="newsletter.html" class="btn-nav"><i class="fas fa-envelope"></i> Newsletter</a>
+      <button class="hamburger" id="hamburger" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</nav>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="page-hero-label"><i class="fas fa-newspaper"></i> AI News</div>
+    <h1 class="page-hero-title">Breaking AI News</h1>
+    <p class="page-hero-desc">Real-time coverage of OpenAI, Google, Anthropic, xAI, Meta and every major AI development. Updated three times daily.</p>
+  </div>
+</div>
+
+<!-- FILTERS + CONTENT -->
+<section class="section">
+  <div class="container">
+    <!-- Top bar -->
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:24px">
+      <div class="filter-bar" id="filterBar" style="margin-bottom:0">
+        <button class="filter-btn active" data-cat="">All</button>
+        <button class="filter-btn" data-cat="openai">OpenAI</button>
+        <button class="filter-btn" data-cat="google">Google</button>
+        <button class="filter-btn" data-cat="anthropic">Anthropic</button>
+        <button class="filter-btn" data-cat="xai">xAI</button>
+        <button class="filter-btn" data-cat="meta">Meta</button>
+        <button class="filter-btn" data-cat="research">Research</button>
+        <button class="filter-btn" data-cat="policy">Policy</button>
+        <button class="filter-btn" data-cat="creative">Creative</button>
+      </div>
+      <div class="sort-bar">
+        <button class="sort-btn active" data-sort="latest"><i class="fas fa-clock"></i> Latest</button>
+        <button class="sort-btn" data-sort="popular"><i class="fas fa-fire"></i> Popular</button>
+        <button class="sort-btn" data-sort="trending"><i class="fas fa-chart-line"></i> Trending</button>
+      </div>
+    </div>
+
+    <!-- Count -->
+    <p style="font-size:0.78rem;color:var(--muted);margin-bottom:20px"><span id="article-count">—</span> articles found</p>
+
+    <!-- List -->
+    <div class="news-list" id="news-list">
+      <!-- Skeleton -->
+      <div class="news-list-item skeleton"><div class="sk-pulse sk-h1"></div><div style="padding:24px"><div class="sk-pulse sk-h2" style="margin-bottom:10px"></div><div class="sk-pulse sk-h3"></div></div></div>
+      <div class="news-list-item skeleton"><div class="sk-pulse sk-h1"></div><div style="padding:24px"><div class="sk-pulse sk-h2" style="margin-bottom:10px"></div><div class="sk-pulse sk-h3"></div></div></div>
+      <div class="news-list-item skeleton"><div class="sk-pulse sk-h1"></div><div style="padding:24px"><div class="sk-pulse sk-h2" style="margin-bottom:10px"></div><div class="sk-pulse sk-h3"></div></div></div>
+    </div>
+
+    <!-- Load More -->
+    <div style="text-align:center;margin-top:32px">
+      <button class="load-more-btn" id="load-more-news" style="display:none"><i class="fas fa-chevron-down"></i> Load More</button>
+    </div>
+  </div>
+</section>
+
+<!-- NEWSLETTER -->
+<div class="newsletter-cta">
+  <div class="container">
+    <div class="section-label">Daily Briefing</div>
+    <h2 class="section-title">Never Miss a Story</h2>
+    <p class="section-desc" style="margin:8px auto 32px">Get the most important AI developments delivered to your inbox every morning.</p>
+    <form class="newsletter-form" onsubmit="subscribeNewsletter(event)">
+      <input type="email" id="nlEmail" placeholder="your@email.com" required>
+      <button type="submit">Subscribe Free</button>
+    </form>
+    <p class="newsletter-note">No spam · Unsubscribe anytime ·  readers</p>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:1px">
+            <span class="footer-logo-x">X</span>
+            <span class="footer-logo-zai">Z</span><span class="footer-logo-ai">AI</span>
+          </div>
+        </div>
+        <p class="footer-desc">Your source for AI news, tool reviews, and expert analysis.</p>
+        <div class="footer-social">
+          <a href="https://x.com/xzaiai" class="social-btn" target="_blank" rel="noopener"><i class="fab fa-twitter"></i></a>
+          
+          
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Content</div>
+        <div class="footer-links">
+          <a href="news.html">AI News</a>
+          <a href="tools.html">AI Tools</a>
+          <a href="reviews.html">Reviews</a>
+          <a href="free-tools.html">Free AI Tools</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Company</div>
+        <div class="footer-links">
+          <a href="about.html">About Us</a>
+          <a href="contact.html">Contact</a>
+          <a href="newsletter.html">Newsletter</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Legal</div>
+        <div class="footer-links">
+          <a href="privacy.html">Privacy Policy</a>
+          <a href="terms.html">Terms of Service</a>
+          <a href="affiliate.html">Affiliate Disclosure</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 XZAI.ai</span>
+      <a href="sitemap.xml">Sitemap</a>
+    </div>
+  </div>
+</footer>
+
+<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})"><i class="fas fa-chevron-up"></i></button>
+
+<script src="js/main.js"></script>
+<script src="js/ai-engine.js"></script>
+<script>
+// ═══════════════════════════════════════════════════════
+// NEWS PAGE — Load & Filter Articles
+// ═══════════════════════════════════════════════════════
+
+let allArticles = [];
+let currentFilter = '';
+let currentSort = 'latest';
+let displayedCount = 9;
+
+// Wait for Supabase SDK to load
+function waitForSupabase() {
+  return new Promise((resolve) => {
+    if (typeof supabase !== 'undefined') {
+      resolve();
+    } else {
+      const checkInterval = setInterval(() => {
+        if (typeof supabase !== 'undefined') {
+          clearInterval(checkInterval);
+          resolve();
+        }
+      }, 100);
+      
+      // Timeout after 10 seconds
+      setTimeout(() => {
+        clearInterval(checkInterval);
+        console.error('❌ Supabase SDK failed to load');
+        resolve();
+      }, 10000);
+    }
+  });
+}
+
+// Load articles on page load
+document.addEventListener('DOMContentLoaded', async () => {
+  console.log('🔄 Waiting for Supabase SDK...');
+  await waitForSupabase();
+  console.log('✅ Supabase SDK loaded');
+  
+  await loadArticles();
+  setupFilters();
+  setupSorting();
+  setupLoadMore();
+});
+
+// Load articles from Supabase
+async function loadArticles() {
+  try {
+    console.log('🔄 Loading articles from Supabase...');
+    
+    const response = await XZAI_ENGINE.fetchTable('ai_articles', {
+      limit: 100,
+      sort: 'created_at',
+      order: 'desc'
+    });
+    
+    if (response && response.data) {
+      allArticles = response.data.filter(a => a.status === 'published');
+      console.log('✅ Loaded articles:', allArticles.length);
+      renderArticles();
+    } else {
+      console.warn('⚠️ No articles found');
+      showEmptyState();
+    }
+  } catch (error) {
+    console.error('❌ Error loading articles:', error);
+    showErrorState();
+  }
+}
+
+// Render articles
+function renderArticles() {
+  const newsList = document.getElementById('news-list');
+  const countEl = document.getElementById('article-count');
+  
+  // Filter & sort
+  let filtered = filterArticles(allArticles);
+  filtered = sortArticles(filtered);
+  
+  // Update count
+  countEl.textContent = filtered.length;
+  
+  if (filtered.length === 0) {
+    showEmptyState();
+    return;
+  }
+  
+  // Show limited
+  const toShow = filtered.slice(0, displayedCount);
+  
+  newsList.innerHTML = toShow.map(article => `
+    <article class="news-list-item">
+      ${article.image_url ? `
+        <div class="news-thumb" style="background-image:url('${article.image_url}')"></div>
+      ` : ''}
+      <div style="padding:24px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap">
+          <span class="news-cat">${getCategoryLabel(article.category)}</span>
+          <span style="font-size:0.7rem;color:var(--muted)">${formatDate(article.published_at || article.created_at)}</span>
+        </div>
+        <h3 class="news-title">
+          <a href="article.html?id=${article.id}">${article.title}</a>
+        </h3>
+        <p class="news-excerpt">${article.excerpt || article.meta_description || ''}</p>
+        <a href="article.html?id=${article.id}" class="news-read-more">
+          Read More <i class="fas fa-arrow-right" style="font-size:0.7rem;margin-left:4px"></i>
+        </a>
+      </div>
+    </article>
+  `).join('');
+  
+  // Show/hide load more
+  const loadMoreBtn = document.getElementById('load-more-news');
+  if (filtered.length > displayedCount) {
+    loadMoreBtn.style.display = 'inline-flex';
+  } else {
+    loadMoreBtn.style.display = 'none';
+  }
+}
+
+// Filter articles
+function filterArticles(articles) {
+  if (!currentFilter) return articles;
+  
+  return articles.filter(a => {
+    const cat = (a.category || '').toLowerCase();
+    const tags = (a.tags || []).map(t => t.toLowerCase());
+    const filter = currentFilter.toLowerCase();
+    
+    return cat === filter || tags.includes(filter);
+  });
+}
+
+// Sort articles
+function sortArticles(articles) {
+  const sorted = [...articles];
+  
+  switch (currentSort) {
+    case 'latest':
+      return sorted.sort((a, b) => 
+        new Date(b.created_at) - new Date(a.created_at)
+      );
+    case 'popular':
+      return sorted.sort((a, b) => 
+        (b.view_count || 0) - (a.view_count || 0)
+      );
+    case 'trending':
+      return sorted.sort((a, b) => {
+        const scoreA = (a.view_count || 0) + (a.share_count || 0) * 2;
+        const scoreB = (b.view_count || 0) + (b.share_count || 0) * 2;
+        return scoreB - scoreA;
+      });
+    default:
+      return sorted;
+  }
+}
+
+// Setup filters
+function setupFilters() {
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  
+  // Get filter from URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlCat = urlParams.get('cat');
+  
+  if (urlCat) {
+    currentFilter = urlCat;
+    filterBtns.forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.cat === urlCat);
+    });
+  }
+  
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentFilter = btn.dataset.cat;
+      displayedCount = 9;
+      
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      
+      renderArticles();
+      
+      // Update URL
+      const url = new URL(window.location);
+      if (currentFilter) {
+        url.searchParams.set('cat', currentFilter);
+      } else {
+        url.searchParams.delete('cat');
+      }
+      window.history.pushState({}, '', url);
+    });
+  });
+}
+
+// Setup sorting
+function setupSorting() {
+  const sortBtns = document.querySelectorAll('.sort-btn');
+  
+  sortBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentSort = btn.dataset.sort;
+      displayedCount = 9;
+      
+      sortBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      
+      renderArticles();
+    });
+  });
+}
+
+// Setup load more
+function setupLoadMore() {
+  const loadMoreBtn = document.getElementById('load-more-news');
+  
+  loadMoreBtn.addEventListener('click', () => {
+    displayedCount += 9;
+    renderArticles();
+  });
+}
+
+// Show empty state
+function showEmptyState() {
+  const newsList = document.getElementById('news-list');
+  newsList.innerHTML = `
+    <div style="text-align:center;padding:80px 20px">
+      <i class="fas fa-newspaper" style="font-size:3rem;color:var(--muted);margin-bottom:16px"></i>
+      <h3 style="font-size:1.2rem;margin-bottom:8px">No articles found</h3>
+      <p style="color:var(--muted);font-size:0.85rem">Try a different filter or check back later.</p>
+    </div>
+  `;
+}
+
+// Show error state
+function showErrorState() {
+  const newsList = document.getElementById('news-list');
+  newsList.innerHTML = `
+    <div style="text-align:center;padding:80px 20px">
+      <i class="fas fa-exclamation-triangle" style="font-size:3rem;color:#f59e0b;margin-bottom:16px"></i>
+      <h3 style="font-size:1.2rem;margin-bottom:8px">Failed to load articles</h3>
+      <p style="color:var(--muted);font-size:0.85rem;margin-bottom:20px">Please check your connection and try again.</p>
+      <button onclick="location.reload()" style="padding:10px 24px;background:var(--accent);border:none;border-radius:8px;color:#fff;cursor:pointer">
+        <i class="fas fa-redo" style="margin-right:6px"></i> Retry
+      </button>
+    </div>
+  `;
+}
+
+// Helpers
+function getCategoryLabel(cat) {
+  const labels = {
+    openai: 'OpenAI',
+    google: 'Google',
+    anthropic: 'Anthropic',
+    xai: 'xAI',
+    meta: 'Meta',
+    research: 'Research',
+    policy: 'Policy',
+    creative: 'Creative',
+    industry: 'Industry'
+  };
+  return labels[cat] || 'AI News';
+}
+
+function formatDate(dateStr) {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now - date;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+  
+  if (diffMins < 1) return 'Just now';
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
+  
+  return date.toLocaleDateString('en-US', { 
+    month: 'short', 
+    day: 'numeric', 
+    year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined 
+  });
+}
+
+// Newsletter subscription
+function subscribeNewsletter(e){
+  e.preventDefault();
+  const email=document.getElementById('nlEmail').value.trim();
+  XZAI_ENGINE.subscribe(email,'news').then(r=>{
+    XZAI_ENGINE.toast(r.message,r.success?'success':'error');
+    if(r.success) document.getElementById('nlEmail').value='';
+  });
+}
+</script>
+<script src="js/xzai-features.js"></script>
+<script src="js/analytics.js"></script>
+<script src="js/push-notifications.js"></script>
+</body>
+</html>

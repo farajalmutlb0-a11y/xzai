@@ -1,0 +1,904 @@
+/* ═══════════════════════════════════════════════════
+   XZAI.AI — Main JavaScript v4.0
+   April 2026 | Professional AI News Hub
+   Features: Dark/Light Mode, Search, Animations,
+   Lazy Loading, Newsletter DB, Counters, Filters
+═══════════════════════════════════════════════════ */
+
+if (window.__xzMainLoaded) { /* prevent double-load */ } else {
+window.__xzMainLoaded = true;
+
+/* ═══════════════════════════
+   DARK / LIGHT MODE
+═══════════════════════════ */
+(function initTheme() {
+  const saved = localStorage.getItem('xz-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  if (saved === 'light') {
+    document.documentElement.style.cssText += ';background:#f4f4f8!important;color:#0a0a14!important';
+  } else {
+    document.documentElement.style.cssText += ';background:#050505!important;color:#fff!important';
+  }
+  updateThemeIcon(saved);
+})();
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  const next = current === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('xz-theme', next);
+  if (next === 'dark') {
+    document.documentElement.style.cssText += ';background:#050505!important;color:#fff!important';
+  } else {
+    document.documentElement.style.cssText += ';background:#f8f9ff!important;color:#0a0a14!important';
+  }
+  updateThemeIcon(next);
+}
+
+function updateThemeIcon(theme) {
+  const btn = document.getElementById('themeToggle');
+  if (!btn) return;
+  const icon = btn.querySelector('i');
+  if (!icon) return;
+  icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+  btn.setAttribute('title', theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode');
+}
+
+/* ═══════════════════════════
+   NAVBAR SCROLL BEHAVIOR
+═══════════════════════════ */
+const navbar = document.getElementById('navbar');
+let lastScrollY = 0;
+window.addEventListener('scroll', () => {
+  if (navbar) {
+    navbar.classList.toggle('scrolled', window.scrollY > 50);
+  }
+  // Back to top button
+  const btn = document.getElementById('backToTop');
+  if (btn) btn.classList.toggle('show', window.scrollY > 500);
+  // Reading progress bar
+  const prog = document.getElementById('read-progress');
+  if (prog) {
+    const doc = document.documentElement;
+    const total = doc.scrollHeight - doc.clientHeight;
+    const pct = total > 0 ? (window.scrollY / total) * 100 : 0;
+    prog.style.width = Math.min(pct, 100) + '%';
+  }
+  lastScrollY = window.scrollY;
+}, { passive: true });
+
+/* ═══════════════════════════════════════════════
+   MOBILE NAV OVERLAY — يُنشأ في body مباشرة
+   لتجنب مشكلة overflow داخل navbar
+═══════════════════════════════════════════════ */
+(function buildMobileNav() {
+  // إنشاء القائمة المتنقلة خارج navbar
+  const overlay = document.createElement('div');
+  overlay.id = 'mobileNavOverlay';
+  overlay.style.cssText = [
+    'display:none',
+    'position:fixed',
+    'top:60px',
+    'left:0',
+    'right:0',
+    'bottom:0',
+    'width:100vw',
+    'height:calc(100vh - 60px)',
+    'background:#050505',
+    'z-index:99999',
+    'overflow-y:auto',
+    'overflow-x:hidden',
+    '-webkit-overflow-scrolling:touch',
+    'flex-direction:column',
+    'padding:0 0 60px 0',
+    'border-top:1px solid rgba(255,255,255,0.08)'
+  ].join(';');
+
+  const page = window.location.pathname.split('/').pop() || 'index.html';
+
+  const links = [
+    { href:'index.html',       icon:'fa-home',        label:'Home' },
+    { href:'news.html',        icon:'fa-newspaper',   label:'AI News' },
+    { href:'tools.html',       icon:'fa-tools',       label:'AI Tools' },
+    { href:'reviews.html',     icon:'fa-star',        label:'Reviews' },
+    { href:'free-tools.html',  icon:'fa-gift',        label:'Free Tools' },
+    { href:'about.html',       icon:'fa-info-circle', label:'About' },
+    { href:'newsletter.html',  icon:'fa-envelope',    label:'Newsletter', accent:true },
+  ];
+
+  overlay.innerHTML = links.map(l => `
+    <a href="${l.href}" style="
+      display:flex; align-items:center; gap:16px;
+      padding:18px 24px;
+      border-bottom:1px solid rgba(255,255,255,0.06);
+      font-size:1rem; font-weight:500;
+      color:${l.accent ? '#a78bfa' : (l.href === page ? '#ffffff' : 'rgba(255,255,255,0.72)')};
+      background:${l.href === page ? 'rgba(255,255,255,0.04)' : 'transparent'};
+      text-decoration:none;
+    ">
+      <i class="fas ${l.icon}" style="width:20px;text-align:center;opacity:0.55;font-size:0.9rem"></i>
+      ${l.label}
+      ${l.href === page ? '<span style="margin-left:auto;width:6px;height:6px;border-radius:50%;background:#a78bfa"></span>' : ''}
+    </a>`).join('') + `
+    <div style="padding:24px">
+      <a href="news.html" style="display:block;text-align:center;padding:14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:10px;color:#fff;font-weight:600;font-size:0.9rem;text-decoration:none">
+        <i class="fas fa-rss" style="margin-left:8px"></i> أحدث أخبار الذكاء الاصطناعي
+      </a>
+    </div>`;
+
+  document.body.insertBefore(overlay, document.body.firstChild);
+
+  // ربط hamburger بهذه القائمة
+  window._mobileNavOpen = false;
+  window.toggleMobileNav = function() {
+    const hb = document.getElementById('hamburger');
+    window._mobileNavOpen = !window._mobileNavOpen;
+    overlay.style.display = window._mobileNavOpen ? 'flex' : 'none';
+    overlay.style.flexDirection = 'column';
+    if (hb) {
+      hb.classList.toggle('active', window._mobileNavOpen);
+      hb.setAttribute('aria-expanded', String(window._mobileNavOpen));
+    }
+    document.body.style.overflow = window._mobileNavOpen ? 'hidden' : '';
+  };
+
+  window.closeMobileNav = function() {
+    window._mobileNavOpen = false;
+    overlay.style.display = 'none';
+    const hb = document.getElementById('hamburger');
+    if (hb) { hb.classList.remove('active'); hb.setAttribute('aria-expanded','false'); }
+    document.body.style.overflow = '';
+  };
+})();
+
+/* ═══════════════════════════
+   HAMBURGER MENU — Mobile
+═══════════════════════════ */
+function toggleMenu() { window.toggleMobileNav && window.toggleMobileNav(); }
+function closeMenu()  { window.closeMobileNav  && window.closeMobileNav();  }
+
+(function initMobileMenu() {
+  function setup() {
+    const hb = document.getElementById('hamburger');
+    if (!hb) return;
+
+    hb.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      window.toggleMobileNav();
+    });
+
+    // إغلاق عند النقر خارج القائمة
+    document.addEventListener('click', function(e) {
+      if (window._mobileNavOpen && !hb.contains(e.target)) {
+        const overlay = document.getElementById('mobileNavOverlay');
+        if (overlay && !overlay.contains(e.target)) {
+          window.closeMobileNav();
+        }
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setup);
+  } else {
+    setup();
+  }
+})();
+
+/* ═══════════════════════════
+   ACTIVE NAV LINK
+═══════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  const path = window.location.pathname.split('/').pop() || 'index.html';
+  document.querySelectorAll('.nav-link').forEach(l => {
+    const href = l.getAttribute('href')?.split('?')[0];
+    l.classList.toggle('active', href === path);
+  });
+});
+
+/* ═══════════════════════════
+   SCROLL REVEAL ANIMATIONS
+═══════════════════════════ */
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach((entry, idx) => {
+    if (entry.isIntersecting) {
+      const el = entry.target;
+      const delay = el.dataset.delay || (idx * 80);
+      setTimeout(() => {
+        el.classList.add('visible', 'revealed');
+      }, parseInt(delay));
+      revealObserver.unobserve(el);
+    }
+  });
+}, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .news-card, .tool-card, .review-item, .news-list-item').forEach((el, i) => {
+  el.dataset.delay = i * 60;
+  revealObserver.observe(el);
+});
+
+/* ═══════════════════════════
+   STATS COUNTER ANIMATION
+═══════════════════════════ */
+function animateCounter(el) {
+  const target   = parseInt(el.getAttribute('data-target'));
+  const duration = 2500;
+  const step     = target / (duration / 16);
+  let current    = 0;
+  const timer = setInterval(() => {
+    current += step;
+    if (current >= target) { current = target; clearInterval(timer); }
+    el.textContent = formatNumber(Math.floor(current));
+  }, 16);
+}
+
+function formatNumber(n) {
+  if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+  if (n >= 1000)    return (n / 1000).toFixed(0) + 'K';
+  return n.toLocaleString();
+}
+
+const counterObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      animateCounter(e.target);
+      counterObs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.5 });
+document.querySelectorAll('.stat-num[data-target]').forEach(c => counterObs.observe(c));
+
+/* ═══════════════════════════
+   LAZY LOADING IMAGES
+═══════════════════════════ */
+const imgObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const img = entry.target;
+      if (img.dataset.src) {
+        img.src = img.dataset.src;
+        img.removeAttribute('data-src');
+        img.style.opacity = '0';
+        img.onload = () => {
+          img.style.transition = 'opacity 0.4s ease';
+          img.style.opacity = '1';
+        };
+      }
+      imgObserver.unobserve(img);
+    }
+  });
+}, { rootMargin: '200px' });
+document.querySelectorAll('img[data-src]').forEach(img => imgObserver.observe(img));
+
+/* ═══════════════════════════
+   GLOBAL SEARCH
+═══════════════════════════ */
+const SEARCH_INDEX = [
+  // News Articles
+  { title: 'Claude 3.7 Sonnet Sets New Record on Coding Benchmarks — Surpasses GPT-4o', url: 'article.html', cat: 'Anthropic', icon: 'fa-brain', type: 'article' },
+  { title: 'EU AI Act Enforcement Begins — What Every Tech Company Must Do Now', url: 'article.html', cat: 'Policy', icon: 'fa-gavel', type: 'article' },
+  { title: 'Midjourney V7 Launches With Photorealistic Output That Stuns the Internet', url: 'article.html', cat: 'Creative AI', icon: 'fa-palette', type: 'article' },
+  { title: 'Google DeepMind Opens AI Research Lab in Singapore', url: 'article.html', cat: 'Google', icon: 'fa-flask', type: 'article' },
+  { title: 'OpenAI GPT-4.5 Orion: Internal Benchmarks Show Dramatic Improvements', url: 'article.html', cat: 'OpenAI', icon: 'fa-robot', type: 'article' },
+  { title: 'AlphaFold 3 Revolutionizes Drug Discovery with Protein-Drug Predictions', url: 'article.html', cat: 'Research', icon: 'fa-dna', type: 'article' },
+  { title: 'Meta Llama 3.3 Released — 405B Parameters Open Source', url: 'article.html', cat: 'Meta AI', icon: 'fa-microchip', type: 'article' },
+  { title: 'Apple Intelligence 2.0: On-Device AI Expands to 50 New Countries', url: 'article.html', cat: 'Business', icon: 'fa-mobile-screen', type: 'article' },
+  // Tools
+  { title: 'ChatGPT Plus (GPT-4o) — Full Review 2026', url: 'reviews.html', cat: 'Review', icon: 'fa-star', type: 'review' },
+  { title: 'Claude 3.7 Sonnet Review — Best AI for Coding?', url: 'reviews.html', cat: 'Review', icon: 'fa-star', type: 'review' },
+  { title: 'Midjourney V7 In-Depth Review', url: 'reviews.html', cat: 'Review', icon: 'fa-palette', type: 'review' },
+  { title: 'Top 10 Free AI Tools in 2026', url: 'free-tools.html', cat: 'Free Tools', icon: 'fa-gift', type: 'tool' },
+  { title: 'Best AI Writing Tools', url: 'tools.html', cat: 'Tools', icon: 'fa-pen-nib', type: 'tool' },
+  { title: 'Best AI Coding Assistants 2026', url: 'tools.html', cat: 'Tools', icon: 'fa-code', type: 'tool' },
+  { title: 'GitHub Copilot vs Cursor vs Claude Code', url: 'best-ai-tools.html', cat: 'Tools', icon: 'fa-code', type: 'tool' },
+  // Pages
+  { title: 'About XZAI — Our Mission & Team', url: 'about.html', cat: 'About', icon: 'fa-info-circle', type: 'page' },
+  { title: 'Advertise with XZAI', url: 'advertise.html', cat: 'Company', icon: 'fa-bullhorn', type: 'page' },
+  { title: 'Newsletter — Daily AI Digest', url: 'newsletter.html', cat: 'Newsletter', icon: 'fa-envelope', type: 'page' },
+  { title: 'Contact XZAI', url: 'contact.html', cat: 'Company', icon: 'fa-envelope', type: 'page' },
+  { title: 'Best AI Tools 2026 — Ultimate Guide', url: 'best-ai-tools.html', cat: 'Guide', icon: 'fa-trophy', type: 'page' },
+];
+
+function openSearch() {
+  const overlay = document.getElementById('searchOverlay');
+  if (overlay) {
+    overlay.classList.add('active');
+    setTimeout(() => overlay.querySelector('input')?.focus(), 100);
+  }
+}
+
+function closeSearch() {
+  const overlay = document.getElementById('searchOverlay');
+  if (overlay) {
+    overlay.classList.remove('active');
+    const resultsEl = overlay.querySelector('.search-results');
+    if (resultsEl) { resultsEl.innerHTML = ''; resultsEl.classList.remove('has-results'); }
+    const input = overlay.querySelector('input');
+    if (input) input.value = '';
+  }
+}
+
+// Keyboard shortcut: Cmd/Ctrl + K
+document.addEventListener('keydown', (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); openSearch(); }
+  if (e.key === 'Escape') closeSearch();
+});
+
+// Search input handler
+document.addEventListener('DOMContentLoaded', () => {
+  const searchInput = document.getElementById('searchInput');
+  const searchResults = document.getElementById('searchResults');
+  if (searchInput && searchResults) {
+    searchInput.addEventListener('input', (e) => {
+      const q = e.target.value.trim().toLowerCase();
+      if (q.length < 2) {
+        searchResults.innerHTML = '';
+        searchResults.classList.remove('has-results');
+        return;
+      }
+      const matches = SEARCH_INDEX.filter(item =>
+        item.title.toLowerCase().includes(q) ||
+        item.cat.toLowerCase().includes(q)
+      ).slice(0, 8);
+
+      if (matches.length === 0) {
+        searchResults.innerHTML = `<div class="search-no-results"><i class="fas fa-search" style="font-size:2rem;margin-bottom:8px;opacity:0.3"></i><br>No results for "<strong>${q}</strong>"</div>`;
+      } else {
+        searchResults.innerHTML = matches.map(m => `
+          <div class="search-result-item" onclick="location.href='${m.url}'">
+            <div class="search-result-icon"><i class="fas ${m.icon}"></i></div>
+            <div>
+              <div class="search-result-title">${highlight(m.title, q)}</div>
+              <div class="search-result-cat">${m.type.toUpperCase()} · ${m.cat}</div>
+            </div>
+          </div>
+        `).join('');
+      }
+      searchResults.classList.add('has-results');
+    });
+
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const first = searchResults.querySelector('.search-result-item');
+        if (first) first.click();
+      }
+    });
+  }
+});
+
+function highlight(text, query) {
+  const re = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+  return text.replace(re, '<mark style="background:rgba(255,255,255,0.12);color:#ffffff;border-radius:2px">$1</mark>');
+}
+
+/* ═══════════════════════════
+   NEWSLETTER — SAVE TO DB
+═══════════════════════════ */
+// Helper: يُحدد عنوان API تلقائياً (منصة أو استضافة خارجية)
+function resolveApiUrl(table, id = '') {
+  if (typeof XZAI_ENGINE !== 'undefined') return XZAI_ENGINE.apiUrl(table, id);
+  
+  const isLocal = window.location.hostname.includes('genspark') ||
+                  window.location.hostname === 'localhost' ||
+                  window.location.hostname === '127.0.0.1';
+  
+  // استخدام Supabase إذا كان متوفراً
+  if (!isLocal && window.XZAI_CONFIG?.supabase) {
+    return 'supabase';
+  }
+  
+  if (isLocal) return id ? `tables/${table}/${id}` : `tables/${table}`;
+  
+  // Fallback لـ Backend API
+  const backendUrl = window.XZAI_CONFIG?.backend?.url || '';
+  return backendUrl ? `${backendUrl}/api/${table}${id ? '/' + id : ''}` : null;
+}
+
+async function saveSubscriber(email, source) {
+  try {
+    const apiUrl = resolveApiUrl('subscribers');
+    
+    // Supabase Direct
+    if (apiUrl === 'supabase' && window.XZAI_CONFIG?.supabase) {
+      if (!window.supabaseClient) {
+        const { createClient } = supabase;
+        window.supabaseClient = createClient(
+          window.XZAI_CONFIG.supabase.url,
+          window.XZAI_CONFIG.supabase.anonKey
+        );
+      }
+      
+      const { error } = await window.supabaseClient
+        .from('subscribers')
+        .insert({
+          email,
+          subscribed_at: new Date().toISOString(),
+          source: source || window.location.pathname,
+          status: 'active'
+        });
+        
+      return !error;
+    }
+    
+    // Traditional API
+    if (!apiUrl) throw new Error('No API URL configured');
+    const res = await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email,
+        subscribed_at: new Date().toISOString(),
+        source: source || window.location.pathname,
+        status: 'active'
+      })
+    });
+    return res.ok;
+  } catch (err) {
+    console.warn('Subscription DB error:', err);
+    return false;
+  }
+}
+
+function subscribeNewsletter(e) {
+  if (e) e.preventDefault();
+  const emailEl = document.getElementById('nlEmail');
+  if (!emailEl) return;
+  const email = emailEl.value.trim();
+  if (!isValidEmail(email)) {
+    showToast('Please enter a valid email address.', 'error');
+    return;
+  }
+  saveSubscriber(email, 'main-form');
+  const form = emailEl.closest('form');
+  if (form) {
+    form.innerHTML = `
+      <div style="text-align:center;padding:24px">
+        <div style="width:64px;height:64px;background:rgba(16,185,129,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+          <i class='fas fa-check' style='color:#10b981;font-size:1.5rem'></i>
+        </div>
+        <p style="font-weight:800;font-size:1.1rem;margin-bottom:6px">You're subscribed!</p>
+        <p style="color:var(--muted);font-size:0.88rem">Welcome to the XZAI community. Check your inbox for your first AI digest.</p>
+      </div>`;
+  }
+  showToast('Successfully subscribed!', 'success');
+}
+
+function subscribeNewsletter2(e) {
+  if (e) e.preventDefault();
+  const emailEl = document.getElementById('nlEmail2');
+  if (!emailEl) return;
+  const email = emailEl.value.trim();
+  if (!isValidEmail(email)) {
+    showToast('Please enter a valid email address.', 'error');
+    return;
+  }
+  saveSubscriber(email, 'sidebar-widget');
+  const msgEl = document.getElementById('nlMsg2');
+  if (msgEl) {
+    msgEl.style.display = 'flex';
+    msgEl.style.alignItems = 'center';
+    msgEl.style.gap = '6px';
+  }
+  emailEl.value = '';
+  showToast('Subscribed! Check your inbox.', 'success');
+}
+
+/* ═══════════════════════════
+   CONTACT FORM
+═══════════════════════════ */
+async function submitContact(e) {
+  if (e) e.preventDefault();
+  const name    = document.getElementById('contactName')?.value?.trim();
+  const email   = document.getElementById('contactEmail')?.value?.trim();
+  const subject = document.getElementById('contactSubject')?.value?.trim();
+  const message = document.getElementById('contactMessage')?.value?.trim();
+
+  if (!name || !email || !message) {
+    showToast('Please fill in all required fields.', 'error');
+    return;
+  }
+  if (!isValidEmail(email)) {
+    showToast('Please enter a valid email address.', 'error');
+    return;
+  }
+
+  const btn = e.target?.querySelector('button[type=submit]');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...'; }
+
+  try {
+    await fetch(resolveApiUrl('contact_messages'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, subject, message, sent_at: new Date().toISOString() })
+    });
+  } catch {}
+
+  showToast('Message sent! We\'ll respond within 24 hours.', 'success');
+  e.target?.reset();
+  if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message'; }
+}
+
+/* ═══════════════════════════
+   NEWS FILTER (News Page)
+═══════════════════════════ */
+function filterByCategory(cat, btn) {
+  // Update buttons
+  document.querySelectorAll('.nh-cat-btn, .news-filter-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+
+  // Filter articles
+  document.querySelectorAll('.news-list-item, .news-item').forEach(item => {
+    const show = cat === 'all' || item.dataset.cat === cat;
+    item.style.display = show ? '' : 'none';
+    if (show) {
+      setTimeout(() => {
+        item.classList.add('revealed');
+      }, 80);
+    }
+  });
+
+  // Update count
+  const countEl = document.getElementById('newsCount');
+  if (countEl) {
+    const visible = document.querySelectorAll('.news-list-item[style=""], .news-list-item:not([style])').length;
+    countEl.textContent = visible;
+  }
+}
+
+/* ═══════════════════════════
+   URL PARAMS — AUTO FILTER
+═══════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  const cat = new URLSearchParams(window.location.search).get('cat');
+  if (cat) {
+    const btn = document.querySelector(`.nh-cat-btn[data-cat="${cat}"]`);
+    if (btn) filterByCategory(cat, btn);
+  }
+});
+
+/* ═══════════════════════════
+   TOOLS FILTER
+═══════════════════════════ */
+function filterTools(cat, btn) {
+  document.querySelectorAll('.tool-filter-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.querySelectorAll('.tool-item').forEach(item => {
+    item.style.display = (cat === 'all' || item.dataset.cat === cat) ? '' : 'none';
+  });
+}
+
+/* ═══════════════════════════
+   TOAST NOTIFICATIONS
+═══════════════════════════ */
+function showToast(message, type = 'info') {
+  const existing = document.querySelector('.xz-toast');
+  if (existing) existing.remove();
+
+  const icons = { success:'fa-check-circle', error:'fa-times-circle', info:'fa-info-circle' };
+  const toast = document.createElement('div');
+  toast.className = `xz-toast ${type}`;
+  toast.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i> ${message}`;
+  document.body.appendChild(toast);
+  setTimeout(() => {
+    toast.style.animation = 'slideInRight 0.3s ease reverse';
+    setTimeout(() => toast.remove(), 300);
+  }, 4000);
+}
+
+/* ═══════════════════════════
+   SHARE BUTTONS
+═══════════════════════════ */
+function shareArticle(platform) {
+  const url = encodeURIComponent(window.location.href);
+  const title = encodeURIComponent(document.title);
+  const urls = {
+    twitter:   `https://twitter.com/intent/tweet?url=${url}&text=${title}`,
+    linkedin:  `https://www.linkedin.com/shareArticle?url=${url}&title=${title}`,
+    whatsapp:  `https://wa.me/?text=${title}%20${url}`,
+  };
+  if (platform === 'copy') {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      showToast('Link copied to clipboard!', 'success');
+    });
+    return;
+  }
+  if (urls[platform]) window.open(urls[platform], '_blank', 'width=600,height=400');
+}
+
+/* ═══════════════════════════
+   COPY CODE SNIPPET
+═══════════════════════════ */
+function copyCode(btn) {
+  const pre = btn.closest('pre') || btn.previousElementSibling;
+  const text = pre?.textContent || '';
+  navigator.clipboard.writeText(text.trim()).then(() => {
+    btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+    setTimeout(() => { btn.innerHTML = '<i class="fas fa-copy"></i> Copy'; }, 2000);
+  });
+}
+
+/* ═══════════════════════════
+   FILTER PILLS (Homepage)
+═══════════════════════════ */
+document.querySelectorAll('.filter-pill').forEach(pill => {
+  pill.addEventListener('click', function(e) {
+    document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+/* ═══════════════════════════
+   SMOOTH PAGE TRANSITIONS
+═══════════════════════════ */
+document.addEventListener('click', (e) => {
+  const link = e.target.closest('a[href]');
+  if (!link) return;
+  const href = link.getAttribute('href');
+  if (!href || href.startsWith('http') || href.startsWith('#') || href.startsWith('mailto') || href.startsWith('javascript')) return;
+  if (link.target === '_blank') return;
+  // Allow normal navigation (no need to block for static site)
+});
+
+/* ═══════════════════════════
+   UTILITY FUNCTIONS
+═══════════════════════════ */
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function getUrlParam(key) {
+  return new URLSearchParams(window.location.search).get(key);
+}
+
+function formatDate(dateStr) {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+}
+
+function timeAgo(dateStr) {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const minutes = Math.floor(diff / 60000);
+  const hours   = Math.floor(minutes / 60);
+  const days    = Math.floor(hours / 24);
+  if (minutes < 60)  return `${minutes}m ago`;
+  if (hours   < 24)  return `${hours}h ago`;
+  if (days    < 7)   return `${days}d ago`;
+  return formatDate(dateStr);
+}
+
+/* ═══════════════════════════
+   HERO CANVAS — clean subtle particles
+═══════════════════════════ */
+(function initHeroCanvas() {
+  const canvas = document.getElementById('heroCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let W, H;
+
+  function resize() {
+    W = canvas.width  = canvas.offsetWidth;
+    H = canvas.height = canvas.offsetHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize, { passive: true });
+
+  // ── Nodes ──
+  const nodes = Array.from({length: 38}, () => ({
+    x: Math.random() * W, y: Math.random() * H,
+    vx: (Math.random()-.5)*.28, vy: (Math.random()-.5)*.28,
+    r: Math.random()*1.8+.6, a: Math.random()*.35+.08,
+    p: Math.random()*Math.PI*2,
+    col: Math.random()>.5 ? '167,139,250' : '125,211,252',
+  }));
+
+  // ── Binary drops ──
+  const drops = Array.from({length: 20}, (_,i) => ({
+    x: (i/20)*(W||window.innerWidth) + Math.random()*35,
+    y: Math.random()*(H||window.innerHeight),
+    sp: Math.random()*.38+.1,
+    chars: Array.from({length:14},()=>Math.random()>.5?'1':'0'),
+    a: Math.random()*.08+.025,
+    sz: Math.floor(Math.random()*3)+8,
+  }));
+
+  // ── Orbit rings (centred on logo area ~40% from top) ──
+  const rings = [
+    {r:180, spd: .0007, off:0,   dash:[5,12], col:'rgba(167,139,250,0.12)'},
+    {r:240, spd:-.0005, off:1.2, dash:[3,14], col:'rgba(125,211,252,0.08)'},
+    {r:300, spd: .0003, off:2.5, dash:[7,18], col:'rgba(167,139,250,0.05)'},
+  ];
+  const odots = [
+    {ri:0,a:0,         col:'167,139,250',r:3.5},
+    {ri:0,a:Math.PI,   col:'125,211,252',r:2.8},
+    {ri:1,a:.7,        col:'125,211,252',r:3.5},
+    {ri:1,a:3.9,       col:'167,139,250',r:2.2},
+    {ri:2,a:1.4,       col:'167,139,250',r:3},
+    {ri:2,a:4.6,       col:'125,211,252',r:2.2},
+  ];
+
+  // ── Data packets ──
+  const pkts = Array.from({length:8},()=>({
+    p:Math.random(), sp:Math.random()*.003+.0015,
+    a:Math.floor(Math.random()*nodes.length),
+    b:Math.floor(Math.random()*nodes.length),
+    col:Math.random()>.5?'167,139,250':'125,211,252',
+  }));
+
+  let t = 0, scanY = 0;
+
+  function draw() {
+    t += .001;
+    // update W/H in case of resize
+    if (canvas.offsetWidth) { W = canvas.width; H = canvas.height; }
+    ctx.clearRect(0, 0, W, H);
+    scanY = (scanY + .3) % H;
+
+    const cx = W/2, cy = H*.38; // centre slightly above middle
+
+    // Scan line
+    const sg = ctx.createLinearGradient(0,scanY-20,0,scanY+20);
+    sg.addColorStop(0,'rgba(167,139,250,0)');
+    sg.addColorStop(.5,'rgba(167,139,250,0.028)');
+    sg.addColorStop(1,'rgba(167,139,250,0)');
+    ctx.fillStyle=sg; ctx.fillRect(0,scanY-20,W,40);
+
+    // Orbit rings
+    ctx.setLineDash([]);
+    rings.forEach(ring => {
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(t * ring.spd * 1000 + ring.off);
+      ctx.beginPath(); ctx.arc(0,0,ring.r,0,Math.PI*2);
+      ctx.setLineDash(ring.dash);
+      ctx.strokeStyle=ring.col; ctx.lineWidth=1; ctx.stroke();
+      ctx.restore();
+    });
+
+    // Orbit dots
+    odots.forEach(d => {
+      d.a += rings[d.ri].spd * 1.6;
+      const rr = rings[d.ri];
+      const ang = d.a + t * rr.spd * 1000 + rr.off;
+      const x = cx + Math.cos(ang)*rr.r;
+      const y = cy + Math.sin(ang)*rr.r;
+      const g = ctx.createRadialGradient(x,y,0,x,y,d.r*5);
+      g.addColorStop(0,`rgba(${d.col},.85)`);
+      g.addColorStop(1,`rgba(${d.col},0)`);
+      ctx.beginPath(); ctx.arc(x,y,d.r*5,0,Math.PI*2);
+      ctx.fillStyle=g; ctx.fill();
+      ctx.beginPath(); ctx.arc(x,y,d.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(${d.col},1)`; ctx.fill();
+    });
+
+    // Neural connections
+    ctx.setLineDash([]);
+    for (let i=0;i<nodes.length;i++) {
+      for (let j=i+1;j<nodes.length;j++) {
+        const dx=nodes[i].x-nodes[j].x, dy=nodes[i].y-nodes[j].y;
+        const dist=Math.sqrt(dx*dx+dy*dy);
+        if(dist<130){
+          ctx.beginPath();
+          ctx.moveTo(nodes[i].x,nodes[i].y);
+          ctx.lineTo(nodes[j].x,nodes[j].y);
+          ctx.strokeStyle=`rgba(167,139,250,${(1-dist/130)*.08})`;
+          ctx.lineWidth=.4; ctx.stroke();
+        }
+      }
+    }
+
+    // Data packets
+    pkts.forEach(pk => {
+      const a=nodes[pk.a], b=nodes[pk.b];
+      const dx=b.x-a.x, dy=b.y-a.y;
+      if(Math.sqrt(dx*dx+dy*dy)<150){
+        ctx.beginPath();
+        ctx.arc(a.x+dx*pk.p, a.y+dy*pk.p, 2,0,Math.PI*2);
+        ctx.fillStyle=`rgba(${pk.col},.8)`; ctx.fill();
+      }
+      pk.p += pk.sp;
+      if(pk.p>1){
+        pk.p=0;
+        pk.a=Math.floor(Math.random()*nodes.length);
+        pk.b=Math.floor(Math.random()*nodes.length);
+      }
+    });
+
+    // Nodes
+    nodes.forEach(n => {
+      n.p+=.022;
+      const a=n.a+Math.sin(n.p)*.06;
+      ctx.beginPath(); ctx.arc(n.x,n.y,n.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(${n.col},${a})`; ctx.fill();
+      ctx.beginPath(); ctx.arc(n.x,n.y,n.r*3,0,Math.PI*2);
+      ctx.fillStyle=`rgba(${n.col},${a*.07})`; ctx.fill();
+      n.x+=n.vx; n.y+=n.vy;
+      if(n.x<0||n.x>W) n.vx*=-1;
+      if(n.y<0||n.y>H) n.vy*=-1;
+    });
+
+    // Binary rain
+    drops.forEach(d => {
+      d.chars.forEach((c,i)=>{
+        ctx.font=`${d.sz}px monospace`;
+        ctx.fillStyle=`rgba(125,211,252,${d.a*(1-i/d.chars.length)})`;
+        ctx.fillText(c, d.x, (d.y+i*d.sz)%H);
+      });
+      d.y+=d.sp; if(d.y>H) d.y=-180;
+    });
+
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ═══════════════════════════
+   REVEAL INIT (for dynamic content)
+═══════════════════════════ */
+function initReveal() {
+  document.querySelectorAll('.reveal:not([data-observed])').forEach((el, i) => {
+    el.dataset.observed = '1';
+    el.dataset.delay = el.dataset.delay || (i * 60);
+    revealObserver.observe(el);
+  });
+}
+
+/* ═══════════════════════════
+   BACK TO TOP
+═══════════════════════════ */
+const bttBtn = document.getElementById('backToTop');
+if (bttBtn) {
+  bttBtn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+
+/* ═══════════════════════════
+   TICKER PAUSE ON HOVER
+═══════════════════════════ */
+const ticker = document.querySelector('.ticker-track');
+if (ticker) {
+  ticker.addEventListener('mouseenter', () => ticker.style.animationPlayState = 'paused');
+  ticker.addEventListener('mouseleave', () => ticker.style.animationPlayState = 'running');
+}
+
+/* ═══════════════════════════
+   IMAGE ERROR FALLBACK
+═══════════════════════════ */
+document.querySelectorAll('img').forEach(img => {
+  img.addEventListener('error', function() {
+    this.style.display = 'none';
+    const parent = this.parentElement;
+    if (parent && !parent.querySelector('.img-fallback')) {
+      const fallback = document.createElement('div');
+      fallback.className = 'img-fallback';
+      fallback.style.cssText = 'width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#0a0a0a;color:rgba(255,255,255,0.12);font-size:2rem;';
+      fallback.innerHTML = '<i class="fas fa-image"></i>';
+      parent.appendChild(fallback);
+    }
+  });
+});
+
+/* ═══════════════════════════
+   PERFORMANCE: PAGE LOAD LOG
+═══════════════════════════ */
+window.addEventListener('load', () => {
+  if (performance.getEntriesByType) {
+    const nav = performance.getEntriesByType('navigation')[0];
+    if (nav) {
+      const loadTime = (nav.loadEventEnd / 1000).toFixed(2);
+
+      return;
+    }
+  }
+
+});
+} // end __xzMainLoaded guard
+
+/* ═══════════════════════════════════
+   GLOBAL MENU HELPERS (always available)
+═══════════════════════════════════ */
+// toggleMenu global fallback
+if (typeof window.toggleMenu !== 'function') {
+  window.toggleMenu = function() { window.toggleMobileNav && window.toggleMobileNav(); };
+}

@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XZAI Newsletter – Free Daily AI Digest</title>
+  <meta name="description" content="Subscribe to XZAI's free daily AI newsletter. Get the top AI news, tools, and breakthroughs delivered to your inbox every morning.">
+  <meta property="og:description" content="Subscribe to XZAI's free daily AI newsletter. Get the top AI news, tools, and breakthroughs delivered to your inbox every morning.">
+  <link rel="canonical" href="https://xzai.ai/newsletter.html">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#7c3aed">
+  <link rel="icon" href="images/logo-xzai.webp">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;0,9..40,900;1,9..40,400&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/grok-theme.css">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BMBBHWQBZ5"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-BMBBHWQBZ5');</script>
+  <style>
+    html,body { background:#050505!important; color:#fff!important; }
+
+    /* ── Hero Subscribe Box ── */
+    .nl-hero {
+      text-align: center;
+      padding: 80px 24px 60px;
+      position: relative;
+      overflow: hidden;
+    }
+    .nl-hero::before {
+      content:'';
+      position:absolute; top:0; left:50%; transform:translateX(-50%);
+      width:600px; height:600px; border-radius:50%;
+      background:radial-gradient(circle, rgba(167,139,250,0.) 0%, transparent 65%);
+      pointer-events:none;
+    }
+    .nl-hero-inner { max-width: 580px; margin: 0 auto; position:relative; z-index:1; }
+    .nl-badge {
+      display:inline-flex; align-items:center; gap:8px;
+      padding:5px 16px; border-radius:999px;
+      border:1px solid rgba(167,139,250,0.);
+      font-size:0.72rem; font-weight:700; letter-spacing:0.12em;
+      text-transform:uppercase; color:var(--accent);
+      margin-bottom:24px;
+    }
+    .nl-title {
+      font-family:'DM Sans',sans-serif;
+      font-size:clamp(2rem,5vw,3rem);
+      font-weight:900; line-height:1.1;
+      color:#fff; margin-bottom:16px;
+    }
+    .nl-desc {
+      font-size:0.95rem; color:rgba(255,255,255,0.45);
+      line-height:1.75; margin-bottom:36px;
+    }
+
+    /* ── Subscribe Form ── */
+    .subscribe-box {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 28px 24px;
+      max-width: 480px;
+      margin: 0 auto 16px;
+    }
+    .subscribe-form {
+      display: flex;
+      gap: 0;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 10px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.04);
+    }
+    .subscribe-form input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: #fff;
+      padding: 14px 16px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      outline: none;
+      min-width: 0;
+    }
+    .subscribe-form input::placeholder { color: rgba(255,255,255,0.28); }
+    .subscribe-form button {
+      background: #fff;
+      color: #050505;
+      border: none;
+      padding: 14px 22px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      white-space: nowrap;
+      transition: opacity 0.2s;
+      flex-shrink: 0;
+    }
+    .subscribe-form button:hover  { opacity: 0.88; }
+    .subscribe-form button:disabled { opacity: 0.5; cursor:not-allowed; }
+
+    .subscribe-note {
+      font-size: 0.74rem;
+      color: rgba(255,255,255,0.28);
+      text-align: center;
+      margin-top: 12px;
+    }
+    .subscribe-note i { color: var(--accent); margin-left: 4px; }
+
+    /* Success State */
+    .success-state {
+      display: none;
+      padding: 28px 20px;
+      text-align: center;
+      background: rgba(16,185,129,0.06);
+      border: 1px solid rgba(16,185,129,0.2);
+      border-radius: 16px;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    .success-icon {
+      width: 60px; height: 60px;
+      background: rgba(16,185,129,0.12);
+      border-radius: 50%;
+      display: flex; align-items:center; justify-content:center;
+      font-size: 1.5rem; margin: 0 auto 16px;
+      color: #10b981;
+    }
+    .success-title { font-size:1.2rem; font-weight:800; color:#fff; margin-bottom:8px; }
+    .success-desc  { font-size:0.85rem; color:rgba(255,255,255,0.45); line-height:1.65; }
+
+    /* Error message */
+    .subscribe-error {
+      display: none;
+      font-size: 0.8rem;
+      color: #ef4444;
+      text-align: center;
+      margin-top: 10px;
+      padding: 8px 12px;
+      background: rgba(239,68,68,0.08);
+      border-radius: 8px;
+    }
+
+    /* ── Benefits Grid ── */
+    .benefits-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+    }
+    .benefit-card {
+      background: var(--bg);
+      padding: 28px 24px;
+      transition: background 0.2s;
+    }
+    .benefit-card:hover { background: var(--bg2); }
+    .benefit-icon {
+      font-size: 1.3rem;
+      margin-bottom: 14px;
+      color: var(--accent);
+      opacity: 0.8;
+    }
+    .benefit-title { font-size:0.92rem; font-weight:700; color:#fff; margin-bottom:8px; }
+    .benefit-desc  { font-size:0.80rem; color:rgba(255,255,255,0.38); line-height:1.7; }
+
+    /* ── Stats ── */
+    .nl-stats {
+      display: grid;
+      grid-template-columns: repeat(4,1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      margin: 48px 0;
+    }
+    @media(max-width:600px){ .nl-stats { grid-template-columns:1fr 1fr; } }
+    .nl-stat {
+      background: var(--bg2);
+      padding: 24px 16px;
+      text-align: center;
+    }
+    .nl-stat-num   { font-size: 1.8rem; font-weight: 800; color: #fff; }
+    .nl-stat-label { font-size: 0.74rem; color: rgba(255,255,255,0.35); margin-top:4px; letter-spacing:0.04em; text-transform:uppercase; }
+
+    /* ── Sample Issues ── */
+    .issue-item {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      padding: 18px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .issue-item:last-child { border-bottom: none; }
+    .issue-date {
+      font-size: 0.72rem; color: rgba(255,255,255,0.28);
+      min-width: 75px; flex-shrink:0; padding-top:3px;
+      font-weight: 600; letter-spacing:0.03em;
+    }
+    .issue-title { font-size:0.88rem; font-weight:600; color:rgba(255,255,255,0.82); margin-bottom:5px; line-height:1.4; }
+    .issue-desc  { font-size:0.78rem; color:rgba(255,255,255,0.35); line-height:1.55; }
+
+    /* Bottom CTA */
+    .nl-cta-bottom {
+      background: linear-gradient(135deg, rgba(167,139,250,0.) 0%, rgba(124,58,237,0.06) 100%);
+      border: 1px solid rgba(167,139,250,0.);
+      border-radius: var(--radius-xl);
+      padding: 48px 24px;
+      text-align: center;
+      margin-top: 48px;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/supabase-helper.js"></script>
+  <script>(function(){localStorage.setItem('xz-theme','dark');document.documentElement.setAttribute('data-theme','dark');document.documentElement.style.background='#050505';})();</script>
+</head>
+<body>
+
+<!-- SEARCH OVERLAY -->
+<div class="search-overlay" id="searchOverlay">
+  <div class="search-box">
+    <i class="fas fa-search search-icon"></i>
+    <input type="text" id="searchInput" placeholder="Search AI news, tools, reviews…" autocomplete="off">
+    <button class="search-close" onclick="closeSearch()"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="search-results" id="searchResults"></div>
+</div>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo" aria-label="XZAI Home">
+      <div class="logo-x">X</div><div class="logo-z">Z</div><div class="logo-ai">AI</div>
+    </a>
+    <ul class="nav-menu-desktop">
+      <li><a href="index.html"      class="nav-link">Home</a></li>
+      <li class="nav-dropdown">
+        <a href="news.html" class="nav-link">AI News <i class="fas fa-chevron-down" style="font-size:0.55rem;margin-left:3px;opacity:0.4"></i></a>
+        <div class="dropdown-panel">
+          <a href="news.html?cat=openai"    class="dp-item"><i class="fas fa-robot"></i> OpenAI / ChatGPT</a>
+          <a href="news.html?cat=google"    class="dp-item"><i class="fab fa-google"></i> Google / Gemini</a>
+          <a href="news.html?cat=anthropic" class="dp-item"><i class="fas fa-brain"></i> Anthropic / Claude</a>
+          <a href="news.html"               class="dp-item"><i class="fas fa-globe"></i> All News</a>
+        </div>
+      </li>
+      <li><a href="tools.html"      class="nav-link">AI Tools</a></li>
+      <li><a href="reviews.html"    class="nav-link">Reviews</a></li>
+      <li><a href="free-tools.html" class="nav-link">Free Tools</a></li>
+      <li><a href="about.html"      class="nav-link">About</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="nav-search-btn" onclick="openSearch()" aria-label="Search"><i class="fas fa-search"></i></button>
+      
+      <button class="hamburger" id="hamburger" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</nav>
+
+<!-- ══ HERO ══ -->
+<div class="nl-hero">
+  <div class="nl-hero-inner">
+
+    <div class="nl-badge">
+      <i class="fas fa-envelope"></i> Free Newsletter
+    </div>
+
+    <h1 class="nl-title">Stay Ahead of the<br>AI Curve</h1>
+
+    <p class="nl-desc">
+      The most important AI news, tools, and breakthroughs —<br>
+      delivered to your inbox every morning. Free forever.
+    </p>
+
+    <!-- ── Main Subscribe Form ── -->
+    <div id="subscribeSection">
+      <div class="subscribe-box">
+        <form class="subscribe-form" id="nlForm1" onsubmit="handleSubscribe(event,'nlEmail1','form1')">
+          <input
+            type="email"
+            id="nlEmail1"
+            placeholder="Enter your email address…"
+            autocomplete="email"
+            required
+          >
+          <button type="submit" id="nlBtn1">
+            <i class="fas fa-paper-plane"></i> Subscribe Free
+          </button>
+        </form>
+        <div class="subscribe-error" id="nlError1"></div>
+        <p class="subscribe-note">
+          <i class="fas fa-lock"></i> No spam &nbsp;·&nbsp;
+          <i class="fas fa-times-circle"></i> Unsubscribe anytime &nbsp;·&nbsp;
+          <i class="fas fa-users"></i> Join our readers
+        </p>
+      </div>
+    </div>
+
+    <!-- Success State -->
+    <div class="success-state" id="successSection">
+      <div class="success-icon"><i class="fas fa-check"></i></div>
+      <div class="success-title">🎉 You're subscribed!</div>
+      <p class="success-desc">
+        Check your inbox for a confirmation.<br>
+        Your first AI digest arrives tomorrow morning.
+      </p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ BENEFITS ══ -->
+<section class="section" style="border-top:1px solid var(--border)">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:40px">
+      <div class="section-label">What You Get</div>
+      <h2 class="section-title">The XZAI Daily Digest</h2>
+      <p class="section-desc">Every weekday morning, your inbox gets:</p>
+    </div>
+
+    <div class="benefits-grid">
+      <div class="benefit-card reveal">
+        <div class="benefit-icon"><i class="fas fa-bolt"></i></div>
+        <div class="benefit-title">Breaking AI News</div>
+        <div class="benefit-desc">The 3–5 most important AI stories of the day, curated by our editorial team.</div>
+      </div>
+      <div class="benefit-card reveal">
+        <div class="benefit-icon"><i class="fas fa-tools"></i></div>
+        <div class="benefit-title">Tool of the Week</div>
+        <div class="benefit-desc">One AI tool reviewed in depth — honest pros, cons, pricing, and a verdict.</div>
+      </div>
+      <div class="benefit-card reveal">
+        <div class="benefit-icon"><i class="fas fa-flask"></i></div>
+        <div class="benefit-title">Research Highlights</div>
+        <div class="benefit-desc">Important AI papers explained in plain English. What it means and why it matters.</div>
+      </div>
+      <div class="benefit-card reveal">
+        <div class="benefit-icon"><i class="fas fa-gift"></i></div>
+        <div class="benefit-title">Free Tool Picks</div>
+        <div class="benefit-desc">Every Friday: the best new free AI tools tested and recommended this week.</div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="nl-stats">
+      <div class="nl-stat">
+        <div class="nl-stat-num">—</div>
+        <div class="nl-stat-label">Subscribers</div>
+      </div>
+      <div class="nl-stat">
+        <div class="nl-stat-num">4.8 ★</div>
+        <div class="nl-stat-label">Rating</div>
+      </div>
+      <div class="nl-stat">
+        <div class="nl-stat-num"></div>
+        <div class="nl-stat-label">Open Rate</div>
+      </div>
+      <div class="nl-stat">
+        <div class="nl-stat-num">500+</div>
+        <div class="nl-stat-label">Editions</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══ RECENT ISSUES ══ -->
+<section class="section" style="border-top:1px solid var(--border)">
+  <div class="container-sm">
+    <div style="text-align:center;margin-bottom:36px">
+      <div class="section-label">Sample Issues</div>
+      <h2 class="section-title">Recent Editions</h2>
+    </div>
+
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-xl);padding:8px 28px">
+      <div class="issue-item">
+        <div class="issue-date">Apr 4, 2026</div>
+        <div>
+          <div class="issue-title">Gemini 2.5 Pro arrives — benchmarks, capabilities, and what it means for GPT-4o</div>
+          <div class="issue-desc">Plus: Claude's new computer-use tool, best free coding AI, and Anthropic's safety update.</div>
+        </div>
+      </div>
+      <div class="issue-item">
+        <div class="issue-date">Apr 3, 2026</div>
+        <div>
+          <div class="issue-title">Meta's Llama 4 Scout goes open — what developers need to know</div>
+          <div class="issue-desc">Plus: EU AI Act enforcement begins, Sora update, and tool of the week: Perplexity Pro.</div>
+        </div>
+      </div>
+      <div class="issue-item">
+        <div class="issue-date">Apr 2, 2026</div>
+        <div>
+          <div class="issue-title">OpenAI o3 breaks new records on math and coding benchmarks</div>
+          <div class="issue-desc">Plus: xAI raises $6B, GitHub Copilot's new features, and free tools Friday picks.</div>
+        </div>
+      </div>
+      <div class="issue-item">
+        <div class="issue-date">Apr 1, 2026</div>
+        <div>
+          <div class="issue-title">Latest AI news and breakthroughs delivered to your inbox</div>
+          <div class="issue-desc">Plus: Google DeepMind's AlphaFold 3 update, Midjourney V7 release, and our weekly free picks.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom CTA -->
+    <div class="nl-cta-bottom">
+      <div class="section-label" style="margin-bottom:16px">Join Thousands of Readers</div>
+      <h2 style="font-family:'DM Sans',sans-serif;font-size:1.6rem;font-weight:900;color:#fff;margin-bottom:12px">
+        Ready to Subscribe?
+      </h2>
+      <p style="color:rgba(255,255,255,0.4);font-size:0.88rem;margin-bottom:28px">
+        Free, always. No spam. Unsubscribe anytime.
+      </p>
+
+      <!-- Second Subscribe Form -->
+      <div id="subscribeSection2" style="max-width:460px;margin:0 auto">
+        <form class="subscribe-form" id="nlForm2" onsubmit="handleSubscribe(event,'nlEmail2','form2')">
+          <input
+            type="email"
+            id="nlEmail2"
+            placeholder="your@email.com"
+            autocomplete="email"
+            required
+          >
+          <button type="submit" id="nlBtn2">Subscribe Free</button>
+        </form>
+        <div class="subscribe-error" id="nlError2"></div>
+      </div>
+      <div class="success-state" id="successSection2" style="max-width:460px;margin:0 auto">
+        <div class="success-icon"><i class="fas fa-check"></i></div>
+        <div class="success-title">🎉 You're subscribed!</div>
+        <p class="success-desc">Welcome to XZAI! Check your inbox for a confirmation.</p>
+      </div>
+      <p class="subscribe-note" style="margin-top:14px">
+        <i class="fas fa-lock"></i> No spam &nbsp;·&nbsp;
+        <i class="fas fa-times-circle"></i> Unsubscribe anytime
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:1px">
+            <span class="footer-logo-x">X</span>
+            <span class="footer-logo-zai">Z</span><span class="footer-logo-ai">AI</span>
+          </div>
+        </div>
+        <p class="footer-desc">Your source for AI news, tool reviews, and expert analysis.</p>
+      </div>
+      <div>
+        <div class="footer-col-title">Content</div>
+        <div class="footer-links">
+          <a href="news.html">AI News</a>
+          <a href="tools.html">AI Tools</a>
+          <a href="reviews.html">Reviews</a>
+          <a href="free-tools.html">Free AI Tools</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Company</div>
+        <div class="footer-links">
+          <a href="about.html">About Us</a>
+          <a href="contact.html">Contact</a>
+          <a href="newsletter.html">Newsletter</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Legal</div>
+        <div class="footer-links">
+          <a href="privacy.html">Privacy Policy</a>
+          <a href="terms.html">Terms of Service</a>
+          <a href="affiliate.html">Affiliate Disclosure</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 XZAI.ai — Faraj Almatlb</span>
+      <a href="sitemap.xml">Sitemap</a>
+    </div>
+  </div>
+</footer>
+
+<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})"><i class="fas fa-chevron-up"></i></button>
+<div id="admin-toast" class="xz-toast"></div>
+
+<script src="js/main.js"></script>
+<script src="js/ai-engine.js"></script>
+<script src="js/xzai-features.js"></script>
+<script src="js/subscribe.js"></script>
+<script>
+/* ══ معالج نموذج الاشتراك ══ */
+async function handleSubscribe(e, emailId, formId) {
+  e.preventDefault();
+
+  const emailEl = document.getElementById(emailId);
+  const btnEl   = e.target.querySelector('button[type="submit"]');
+  const errEl   = document.getElementById('nlError' + formId.replace('form',''));
+  const email   = emailEl.value.trim();
+
+  // تحقق
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    errEl.textContent = '⚠ Please enter a valid email address.';
+    errEl.style.display = 'block';
+    return;
+  }
+  errEl.style.display = 'none';
+
+  // Loading
+  btnEl.disabled = true;
+  btnEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Subscribing…';
+
+  try {
+    const result = await xzSubscribe(email, 'newsletter-page');
+
+    if (result.ok) {
+      // إخفاء الفورم وإظهار نجاح
+      if (formId === 'form1') {
+        document.getElementById('subscribeSection').style.display  = 'none';
+        document.getElementById('successSection').style.display    = 'flex';
+        document.getElementById('successSection').style.flexDirection = 'column';
+        document.getElementById('successSection').style.alignItems = 'center';
+      } else {
+        document.getElementById('subscribeSection2').style.display  = 'none';
+        document.getElementById('successSection2').style.display    = 'flex';
+        document.getElementById('successSection2').style.flexDirection = 'column';
+        document.getElementById('successSection2').style.alignItems = 'center';
+      }
+      // Toast
+      showToast('✅ Subscribed successfully!', 'success');
+    } else {
+      errEl.textContent = result.msg;
+      errEl.style.display = 'block';
+      btnEl.disabled = false;
+      btnEl.innerHTML = '<i class="fas fa-paper-plane"></i> Subscribe Free';
+    }
+  } catch(err) {
+    errEl.textContent = '⚠ Something went wrong. Please try again.';
+    errEl.style.display = 'block';
+    btnEl.disabled = false;
+    btnEl.innerHTML = '<i class="fas fa-paper-plane"></i> Subscribe Free';
+  }
+}
+</script>
+<script src="js/analytics.js"></script>
+</body>
+</html>
